@@ -1,0 +1,31 @@
+meta {
+  name: setup go live on the first page
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "go"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("setup: the run is back on page 0", function() {
+    expect(res.getBody().live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Not a test.
+}

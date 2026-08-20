@@ -1,0 +1,20 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!--
+    The dependency rule is enforced by review, not by tooling. Domain references
+    nothing; Application references Domain; Infrastructure references
+    Application; Api references all three. A ProjectReference pointing the wrong
+    way is the single change that would quietly undo the architecture, so it is
+    worth failing a review over.
+  -->
+
+</Project>

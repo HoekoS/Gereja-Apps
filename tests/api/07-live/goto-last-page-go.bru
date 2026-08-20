@@ -1,0 +1,32 @@
+meta {
+  name: setup go live on the last page
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "go"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("setup: the run is now sitting on the last page", function() {
+    expect(res.getBody().live.pageIndex).to.equal(Number(bru.getVar("lastPageIndex")));
+  });
+}
+
+docs {
+  Not a test on its own, though it does cover the FR-LIV-04 detail that go takes
+  the previewed page rather than resetting to page 0.
+}

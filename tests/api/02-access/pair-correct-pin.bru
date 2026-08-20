@@ -1,0 +1,39 @@
+meta {
+  name: SYS-SEC-02 pair with correct PIN
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/pair
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "pin": "{{pin}}"
+  }
+}
+
+assert {
+  res.status: eq 204
+}
+
+tests {
+  test("SYS-SEC-02: the correct PIN pairs", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("SYS-SEC-02: the cookie is HttpOnly and SameSite=Lax", function() {
+    const setCookie = String(res.getHeader("set-cookie"));
+    expect(setCookie).to.match(/pair=/);
+    expect(setCookie).to.match(/HttpOnly/i);
+    expect(setCookie).to.match(/SameSite=Lax/i);
+  });
+}
+
+docs {
+  Traces FR-SEC-02, FR-SEC-06. Every request after this one relies on the
+  cookie jar carrying the result.
+}

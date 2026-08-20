@@ -1,0 +1,33 @@
+meta {
+  name: SYS-SEC-04 PIN endpoint is loopback only
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/pin
+  body: none
+  auth: none
+}
+
+tests {
+  test("SYS-SEC-04: the PIN endpoint answers only loopback, and says so", function() {
+    // Running from the booth machine itself, this is a legitimate 200.
+    // From any other address it must be 403 LOOPBACK_ONLY.
+    const status = res.getStatus();
+    expect([200, 403]).to.include(status);
+
+    if (status === 403) {
+      expect(res.getBody().error.code).to.equal("LOOPBACK_ONLY");
+      expect(JSON.stringify(res.getBody())).to.not.match(/[0-9]{6}/);
+    }
+  });
+}
+
+docs {
+  PARTIAL COVERAGE. Traces FR-SEC-09, URS-SEC-04.
+
+  The suite runs on one host, so it can exercise only whichever branch that
+  host falls into. The 403-from-LAN path needs a second machine and is listed
+  as an open gap in TEST-CASES section 12.
+}

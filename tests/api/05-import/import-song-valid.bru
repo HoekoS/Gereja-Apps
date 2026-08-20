@@ -1,0 +1,31 @@
+meta {
+  name: SYS-IMP-01 valid song import
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/import
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(../../fixtures/song-openlyrics.xml)
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-IMP-01: a valid song imports", function() {
+    const body = res.getBody();
+    expect(body.kind).to.equal("song");
+    expect(body.imported + body.updated).to.equal(1);
+  });
+}
+
+docs {
+  Traces FR-IMP-04, URS-SONG-02.
+}

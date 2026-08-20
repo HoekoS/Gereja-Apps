@@ -1,0 +1,37 @@
+meta {
+  name: SYS-LIV-07 back at the first page holds
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "back"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-07: going back past the start is not an error", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("SYS-LIV-07: the page index stays at zero and never goes negative", function() {
+    expect(res.getBody().live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-07, URS-LIVE-05. Mirrors UNT-LIV-08. A negative index would
+  reach the renderer, and what the congregation would see is a blank screen
+  where the first verse should be.
+}

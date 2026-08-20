@@ -1,0 +1,32 @@
+meta {
+  name: SYS-SVC-05b the song survives its item being deleted
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/songs/{{songId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SVC-05 [CRITICAL]: removing an item does not remove the song", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().id).to.equal(bru.getVar("songId"));
+  });
+
+  test("SYS-SVC-05 [CRITICAL]: the song keeps its pages", function() {
+    expect(res.getBody().pages.length).to.be.above(0);
+  });
+}
+
+docs {
+  Traces FR-SVC-07, URS-SONG-06. The Library outlives any one service. If
+  deleting an item cascaded into the song, one careless edit on Saturday would
+  strip a hymn out of every service that ever used it.
+}

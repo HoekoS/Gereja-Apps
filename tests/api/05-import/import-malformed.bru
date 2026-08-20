@@ -1,0 +1,38 @@
+meta {
+  name: SYS-IMP-02 malformed import is rejected
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/import
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(../../fixtures/bible-zefania-malformed.xml)
+}
+
+assert {
+  res.status: eq 422
+}
+
+tests {
+  test("SYS-IMP-02 [CRITICAL]: a malformed file is rejected", function() {
+    expect(res.getStatus()).to.equal(422);
+    expect(res.getBody().error.code).to.equal("IMPORT_REJECTED");
+  });
+
+  test("SYS-IMP-05: the message names what failed", function() {
+    // FR-ADM-02 / URS-ADM-02. "Import failed" is not an acceptable message
+    // to hand a volunteer at 9pm on a Saturday.
+    const message = res.getBody().error.message;
+    expect(message.length).to.be.above(20);
+  });
+}
+
+docs {
+  Traces FR-IMP-06, FR-IMP-07, URS-AVL-06. The atomicity half of this case is
+  the next request, which re-reads the library.
+}

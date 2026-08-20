@@ -1,0 +1,37 @@
+meta {
+  name: SYS-MED-00 the media library lists what is on disk
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/media
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const results = res.getBody().results;
+  const present = results.find(m => m.available === true);
+  const missing = results.find(m => m.available === false);
+  bru.setVar("mediaId", present ? present.id : "");
+  bru.setVar("missingMediaId", missing ? missing.id : "");
+}
+
+tests {
+  test("SYS-MED-00: the seed provides one usable file and one deliberately missing one", function() {
+    expect(bru.getVar("mediaId")).to.not.equal("");
+    expect(bru.getVar("missingMediaId")).to.not.equal("");
+  });
+}
+
+docs {
+  The seed described in the test plan registers a media row whose file is absent
+  from disk on purpose. Without it SYS-MED-03 cannot be written, and the failure
+  it covers — a file moved or renamed between Saturday and Sunday — is the most
+  common media failure in a real booth.
+}

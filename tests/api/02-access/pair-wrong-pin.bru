@@ -1,0 +1,37 @@
+meta {
+  name: SYS-SEC-01 pair with wrong PIN
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/pair
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "pin": "000000"
+  }
+}
+
+assert {
+  res.status: eq 401
+}
+
+tests {
+  test("SYS-SEC-01: a wrong PIN is refused", function() {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().error.code).to.equal("BAD_PIN");
+  });
+
+  test("SYS-SEC-01: no cookie is issued on a failed pairing", function() {
+    const setCookie = res.getHeader("set-cookie");
+    expect(setCookie === undefined || String(setCookie).indexOf("pair=") === -1).to.equal(true);
+  });
+}
+
+docs {
+  Traces FR-SEC-02. The fixture PIN is 123456, so 000000 is guaranteed wrong.
+}

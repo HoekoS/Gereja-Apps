@@ -1,0 +1,41 @@
+meta {
+  name: SYS-LIV-09 blackout hides the output
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "blackout",
+    "on": true
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-09 [CRITICAL]: blackout is on", function() {
+    expect(res.getBody().blackout).to.equal(true);
+  });
+
+  test("SYS-LIV-09 [CRITICAL]: blackout does not discard what was live", function() {
+    const live = res.getBody().live;
+    expect(live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-09, URS-LIVE-08. Blackout is the panic button: something wrong
+  is on the screen and it has to go now. It hides, it does not clear, because
+  the operator's next move is almost always to fix the problem and bring the
+  same thing back.
+}

@@ -1,0 +1,31 @@
+meta {
+  name: SYS-SNG-02 search songs by lyric
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/songs?q=berkesudahan
+  body: none
+  auth: none
+}
+
+params:query {
+  q: berkesudahan
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SNG-02: a word appearing only in the lyrics finds the song", function() {
+    // "berkesudahan" is in the seeded lyrics and not in any title. If this
+    // returns nothing, the FTS index covers titles only.
+    expect(res.getBody().results.length).to.be.above(0);
+  });
+}
+
+docs {
+  Traces FR-LIB-13, URS-SONG-05. The operator often knows a line, not a title.
+}

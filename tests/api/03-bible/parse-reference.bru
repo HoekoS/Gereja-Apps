@@ -1,0 +1,32 @@
+meta {
+  name: SYS-BIB-03 parse a free-form reference
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/bible/reference?q=Yohanes 3:16
+  body: none
+  auth: none
+}
+
+params:query {
+  q: Yohanes 3:16
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-BIB-03: an Indonesian reference parses", function() {
+    const ref = res.getBody();
+    expect(ref.bookId).to.equal(43);
+    expect(ref.chapter).to.equal(3);
+    expect(ref.verseStart).to.equal(16);
+  });
+}
+
+docs {
+  Traces FR-LIB-08. The operator's fastest path to a passage mid-service.
+}

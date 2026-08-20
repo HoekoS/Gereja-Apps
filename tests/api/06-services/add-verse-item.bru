@@ -1,0 +1,53 @@
+meta {
+  name: SYS-SVC-02b add a Bible item to the order
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/services/{{serviceId}}/items
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "kind": "bible",
+    "label": "Pembacaan Firman",
+    "ref": {
+      "translationId": "{{translationA}}",
+      "bookId": 43,
+      "chapter": 3,
+      "verseStart": 16,
+      "verseEnd": 17
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+  bru.setVar("verseItemId", res.getBody().id);
+}
+
+tests {
+  test("SYS-SVC-02b: the second item takes the next position", function() {
+    expect(res.getBody().position).to.equal(1);
+  });
+
+  test("SYS-SVC-02b: the passage range is stored as given", function() {
+    const ref = res.getBody().ref;
+    expect(ref.bookId).to.equal(43);
+    expect(ref.chapter).to.equal(3);
+    expect(ref.verseStart).to.equal(16);
+    expect(ref.verseEnd).to.equal(17);
+  });
+}
+
+docs {
+  Traces FR-SVC-02, URS-PREP-02, URS-BIB-02. Stored as a canonical book id, not
+  a book name, so switching translation mid-service stays on the same verse
+  (URS-BIB-05).
+}

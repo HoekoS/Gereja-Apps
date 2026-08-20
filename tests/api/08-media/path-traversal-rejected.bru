@@ -1,0 +1,32 @@
+meta {
+  name: SYS-MED-02 a traversal path is refused
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/media/..%2f..%2f..%2fetc%2fpasswd/stream
+  body: none
+  auth: none
+}
+
+tests {
+  test("SYS-MED-02 [CRITICAL]: the traversal is refused, not served", function() {
+    expect([400, 404]).to.include(res.getStatus());
+  });
+
+  test("SYS-MED-02 [CRITICAL]: no file content leaks in the body", function() {
+    const body = String(res.getBody() ?? "");
+    expect(body).to.not.contain("root:");
+  });
+}
+
+docs {
+  Traces FR-SEC-06, NFR-SEC-03. Media is addressed by database id, never by a
+  caller-supplied path, so this request should not resolve to a file under any
+  circumstances. The second assertion exists because a 200 with a passwd file in
+  it is the failure that matters; the status code alone is not the finding.
+
+  Either 400 or 404 is acceptable: the id is malformed and it also does not
+  exist, and arguing over which is more correct is not worth pinning in a test.
+}

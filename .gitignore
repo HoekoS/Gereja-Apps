@@ -1,0 +1,11 @@
+bin/
+obj/
+node_modules/
+*.user
+.vs/
+artifacts/
+TestResults/
+*.db
+*.db-shm
+*.db-wal
+.superpowers/

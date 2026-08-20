@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLBIBLE biblename="Fixture Terjemahan" type="x-bible">
+  <BIBLEBOOK bnumber="1" bname="Kejadian" bsname="Kej">
+    <CHAPTER cnumber="1">
+      <VERS vnumber="1">Pada mulanya Allah menciptakan langit dan bumi.</VERS>
+      <VERS vnumber="2">Bumi belum berbentuk dan kosong.</VERS>
+      <VERS vnumber="3">Berfirmanlah Allah: "Jadilah terang." Lalu terang itu jadi.</VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+  <BIBLEBOOK bnumber="43" bname="Yohanes" bsname="Yoh">
+    <CHAPTER cnumber="3">
+      <VERS vnumber="16">Karena begitu besar kasih Allah akan dunia ini.</VERS>
+    </CHAPTER>
+  </BIBLEBOOK>
+</XMLBIBLE>

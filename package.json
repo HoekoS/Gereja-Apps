@@ -1,0 +1,9 @@
+{
+  "name": "church-projection-api-tests",
+  "private": true,
+  "description": "Bruno API test runner only. The backend is .NET; see ChurchProjection.slnx.",
+  "scripts": {
+    "test:api": "cd tests/api && bru run --env local -r",
+    "test:api:report": "cd tests/api && bru run --env local -r --reporter-json ../../reports/api-results.json"
+  }
+}

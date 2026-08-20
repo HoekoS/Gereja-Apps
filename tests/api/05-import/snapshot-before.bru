@@ -1,0 +1,32 @@
+meta {
+  name: SYS-IMP-02a snapshot library before import
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/songs
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const results = res.getBody().results;
+  bru.setVar("songCountBefore", String(results.length));
+  bru.setVar("songListBefore", JSON.stringify(results.map(s => s.id).sort()));
+}
+
+tests {
+  test("SYS-IMP-02a: baseline captured", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Not a test in itself. Captures the library state that SYS-IMP-02 compares
+  against after a rejected import.
+}

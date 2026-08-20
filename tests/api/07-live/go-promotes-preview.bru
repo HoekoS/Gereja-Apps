@@ -1,0 +1,39 @@
+meta {
+  name: SYS-LIV-03 go promotes the preview to live
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "go"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-03: what was previewed is now live", function() {
+    const live = res.getBody().live;
+    expect(live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(live.pageIndex).to.equal(0);
+  });
+
+  test("SYS-LIV-03: the live slot carries rendered content, not just an id", function() {
+    expect(res.getBody().live.content).to.be.an("object");
+  });
+}
+
+docs {
+  Traces FR-LIV-04, URS-LIVE-03. The output view renders what the state hands
+  it, so the content travels with the state rather than being fetched
+  separately: one round trip, one source of truth.
+}

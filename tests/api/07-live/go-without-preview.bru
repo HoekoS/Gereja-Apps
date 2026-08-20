@@ -1,0 +1,40 @@
+meta {
+  name: SYS-LIV-04 go with nothing previewed is refused
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "go"
+  }
+}
+
+assert {
+  res.status: eq 409
+}
+
+tests {
+  test("SYS-LIV-04 [CRITICAL]: the refusal is explicit", function() {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().error.code).to.equal("NO_PREVIEW");
+  });
+
+  test("SYS-LIV-04 [CRITICAL]: the refusal leaves the output where it was", function() {
+    const state = res.getBody().state;
+    expect(state.live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(state.live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-05, URS-LIVE-11. The previous request consumed the preview, so
+  a second go has nothing to promote. Refusing is what keeps a double tap on the
+  space bar from blanking the screen the congregation is reading.
+}

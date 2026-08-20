@@ -1,0 +1,34 @@
+meta {
+  name: SYS-BIB-01 list translations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/translations
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const list = res.getBody();
+  bru.setVar("translationA", list[0].id);
+  bru.setVar("translationB", list[1].id);
+}
+
+tests {
+  test("SYS-BIB-01: the seeded translations are listed", function() {
+    const list = res.getBody();
+    expect(list).to.be.an("array");
+    expect(list.length).to.be.at.least(2);
+    expect(list[0]).to.include.keys("id", "abbrev", "name", "language");
+  });
+}
+
+docs {
+  Traces FR-LIB-01, URS-BIB-01. Stores two translation ids for SYS-BIB-04.
+}

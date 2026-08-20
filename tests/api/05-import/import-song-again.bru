@@ -1,0 +1,33 @@
+meta {
+  name: SYS-IMP-03 re-import updates rather than duplicates
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/import
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(../../fixtures/song-openlyrics.xml)
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-IMP-03 [CRITICAL]: the second import updates, it does not add", function() {
+    const body = res.getBody();
+    expect(body.updated).to.equal(1);
+    expect(body.imported).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-IMP-09, URS-SONG-03. This is the requirement behind "import the
+  lyric to update the songs": the same file twice must not leave two songs
+  called Amazing Grace in the operator's search results mid-service.
+}

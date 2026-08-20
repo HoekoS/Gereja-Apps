@@ -1,0 +1,30 @@
+meta {
+  name: SYS-SVC-05 remove an item from the order
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/services/{{serviceId}}/items/{{songItemId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SVC-05: the item is gone from the order", function() {
+    const ids = res.getBody().items.map(i => i.id);
+    expect(ids).to.not.include(bru.getVar("songItemId"));
+  });
+
+  test("SYS-SVC-05: the remaining items are renumbered", function() {
+    expect(res.getBody().items.map(i => i.position)).to.eql([0]);
+  });
+}
+
+docs {
+  Traces FR-SVC-06, URS-PREP-05.
+}

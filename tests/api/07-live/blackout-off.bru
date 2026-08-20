@@ -1,0 +1,35 @@
+meta {
+  name: SYS-LIV-10 leaving blackout restores the same page
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "blackout",
+    "on": false
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-10 [CRITICAL]: the output comes back to exactly where it was", function() {
+    const body = res.getBody();
+    expect(body.blackout).to.equal(false);
+    expect(body.live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(body.live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-09, URS-LIVE-08. Mirrors UNT-LIV-11.
+}

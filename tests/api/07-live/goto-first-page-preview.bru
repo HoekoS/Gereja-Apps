@@ -1,0 +1,33 @@
+meta {
+  name: setup stage the first page of the song
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "preview",
+    "itemId": "{{liveSongItemId}}",
+    "pageIndex": 0
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("setup: the first page is staged", function() {
+    expect(res.getBody().preview.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Not a test. Sets up the lower boundary for SYS-LIV-07.
+}

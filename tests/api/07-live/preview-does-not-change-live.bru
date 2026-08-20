@@ -1,0 +1,42 @@
+meta {
+  name: SYS-LIV-02 preview does not touch the output
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "preview",
+    "itemId": "{{liveSongItemId}}",
+    "pageIndex": 0
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-02 [CRITICAL]: preview loads the preview slot", function() {
+    const preview = res.getBody().preview;
+    expect(preview.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(preview.pageIndex).to.equal(0);
+  });
+
+  test("SYS-LIV-02 [CRITICAL]: the live slot is untouched", function() {
+    expect(res.getBody().live.itemId).to.equal(null);
+  });
+}
+
+docs {
+  Traces FR-LIV-03, URS-LIVE-02. This is the whole point of a two-stage control
+  surface: the operator lines the next thing up while the congregation still
+  sees the current one. If preview ever reached the output, the operator could
+  not search during a service.
+}

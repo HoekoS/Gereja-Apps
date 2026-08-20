@@ -1,0 +1,38 @@
+meta {
+  name: SYS-LIV-12 clear empties the output
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "clear"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-12: nothing is live", function() {
+    expect(res.getBody().live).to.equal(null);
+  });
+
+  test("SYS-LIV-12: the skip marks survive clearing the output", function() {
+    expect(res.getBody().skipped).to.include(bru.getVar("verseItemId"));
+  });
+}
+
+docs {
+  Traces FR-LIV-11, URS-LIVE-10. Clear is what the operator presses between
+  elements, when the screen should hold the standing background rather than the
+  last verse of the last song. It targets the output only: skip marks belong to
+  the run, not to the screen.
+}

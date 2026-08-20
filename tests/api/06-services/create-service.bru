@@ -1,0 +1,44 @@
+meta {
+  name: SYS-SVC-01 create a service
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/services
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Kebaktian Minggu Pagi",
+    "serviceDate": "2026-08-23"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+  bru.setVar("serviceId", res.getBody().id);
+}
+
+tests {
+  test("SYS-SVC-01: the service is created and given an id", function() {
+    const body = res.getBody();
+    expect(body.id).to.be.a("string");
+    expect(body.name).to.equal("Kebaktian Minggu Pagi");
+    expect(body.serviceDate).to.equal("2026-08-23");
+  });
+
+  test("SYS-SVC-01: a new service starts empty", function() {
+    expect(res.getBody().items).to.eql([]);
+  });
+}
+
+docs {
+  Traces FR-SVC-01, URS-PREP-01. Every later request in this folder and in
+  07-live depends on the serviceId stored here.
+}

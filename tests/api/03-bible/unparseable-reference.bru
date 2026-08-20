@@ -1,0 +1,32 @@
+meta {
+  name: SYS-BIB-07 unparseable reference
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/bible/reference?q=asdf
+  body: none
+  auth: none
+}
+
+params:query {
+  q: asdf
+}
+
+assert {
+  res.status: eq 404
+}
+
+tests {
+  test("SYS-BIB-07: nonsense gives 404, not 500", function() {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().error.code).to.equal("UNPARSEABLE_REFERENCE");
+  });
+}
+
+docs {
+  Traces FR-LIB-08. The operator types into this field one character at a
+  time; most prefixes are not valid references. A 500 here would fill the log
+  with noise and could surface as an error state in the booth.
+}

@@ -1,0 +1,28 @@
+meta {
+  name: setup a single wrong PIN attempt
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/pair
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "pin": "000000"
+  }
+}
+
+tests {
+  test("setup: the attempt is either rejected or throttled", function() {
+    expect([401, 429]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  Not a test. SYS-SEC-05 calls this file in a loop to spend the pairing
+  allowance. Kept as its own file so the loop is not a request invoking itself.
+}

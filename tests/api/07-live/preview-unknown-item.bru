@@ -1,0 +1,42 @@
+meta {
+  name: SYS-LIV-08 previewing an item outside the service is refused
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "preview",
+    "itemId": "itm_does_not_exist",
+    "pageIndex": 0
+  }
+}
+
+assert {
+  res.status: eq 409
+}
+
+tests {
+  test("SYS-LIV-08: the unknown item is named as the problem", function() {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().error.code).to.equal("UNKNOWN_ITEM");
+  });
+
+  test("SYS-LIV-08 [CRITICAL]: the live output is untouched by the refusal", function() {
+    const state = res.getBody().state;
+    expect(state.live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(state.live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-08, URS-LIVE-11. Mirrors UNT-LIV-14. A stale control screen
+  holding an item id from a service that has since been edited must not be able
+  to blank the output by asking for it.
+}

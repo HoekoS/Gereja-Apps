@@ -1,0 +1,30 @@
+meta {
+  name: SYS-SVC-04b the order survives the rejected reorder
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/services/{{serviceId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SVC-04 [CRITICAL]: the rejected reorder changed nothing", function() {
+    const items = res.getBody().items;
+    expect(items.length).to.equal(2);
+    expect(items[0].id).to.equal(bru.getVar("verseItemId"));
+    expect(items[1].id).to.equal(bru.getVar("songItemId"));
+  });
+}
+
+docs {
+  Traces FR-SVC-05, URS-AVL-06. A refusal that half-applies is worse than one
+  that fails loudly: the operator would open Sunday's service to find items
+  missing with no record of why.
+}

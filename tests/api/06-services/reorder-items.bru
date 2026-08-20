@@ -1,0 +1,38 @@
+meta {
+  name: SYS-SVC-03 reorder the service items
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/services/{{serviceId}}/items/reorder
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "itemIds": ["{{verseItemId}}", "{{songItemId}}"]
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SVC-03: the order follows the list sent", function() {
+    const items = res.getBody().items;
+    expect(items[0].id).to.equal(bru.getVar("verseItemId"));
+    expect(items[1].id).to.equal(bru.getVar("songItemId"));
+  });
+
+  test("SYS-SVC-03: positions are renumbered from zero with no gaps", function() {
+    const positions = res.getBody().items.map(i => i.position);
+    expect(positions).to.eql([0, 1]);
+  });
+}
+
+docs {
+  Traces FR-SVC-04, URS-PREP-04.
+}

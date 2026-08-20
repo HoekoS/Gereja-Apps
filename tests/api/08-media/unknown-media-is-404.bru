@@ -1,0 +1,32 @@
+meta {
+  name: SYS-MED-04 an unknown media id is a 404, never a 500
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/media/med_nonexistent/stream
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+}
+
+tests {
+  test("SYS-MED-04: missing means 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("SYS-MED-04: the error envelope is the standard shape", function() {
+    expect(res.getBody().error.code).to.be.a("string");
+    expect(res.getBody().error.message).to.be.a("string");
+  });
+}
+
+docs {
+  Traces FR-MED-06, NFR-REL-04. A 500 here would mean an unhandled exception on
+  the request path, and an unhandled exception during a service is a risk to
+  every other connected client, not just this one request.
+}

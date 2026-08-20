@@ -1,0 +1,52 @@
+meta {
+  name: SYS-SEC-05 repeated wrong PINs are rate limited
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/pair
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "pin": "000000"
+  }
+}
+
+script:pre-request {
+  // Spend the allowance before the request this file asserts on. The limit is
+  // small, so this stays cheap.
+  for (let i = 0; i < 10; i++) {
+    await bru.runRequest("09-limits/warmup-wrong-pin.bru");
+  }
+}
+
+assert {
+  res.status: eq 429
+}
+
+tests {
+  test("SYS-SEC-05: sustained guessing is throttled", function() {
+    expect(res.getStatus()).to.equal(429);
+  });
+
+  test("SYS-SEC-05: the client is told when it may try again", function() {
+    expect(res.getHeaders()["retry-after"]).to.be.a("string");
+  });
+}
+
+docs {
+  Traces FR-SEC-05, NFR-SEC-02. A six digit PIN is a million guesses, which is
+  minutes of unthrottled scripting on a LAN. The limit is what makes the PIN
+  worth having.
+
+  This folder runs last on purpose. Tripping the limiter blocks this address
+  from pairing for the cooldown window, so any test running after it would fail
+  for the wrong reason.
+
+  The loop count is a guess until the real limit is fixed in configuration. Once
+  it is, set the count to limit + 1 rather than leaving it at ten.
+}

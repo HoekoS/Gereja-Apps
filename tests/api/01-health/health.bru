@@ -1,0 +1,27 @@
+meta {
+  name: SYS-HLT-01 health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/healthz
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-HLT-01: server is up", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+  });
+}
+
+docs {
+  Entry gate for the whole suite (TEST-PLAN 5). If this fails, nothing below
+  is meaningful.
+}

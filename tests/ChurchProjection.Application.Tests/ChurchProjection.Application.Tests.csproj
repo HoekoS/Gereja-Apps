@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/ChurchProjection.Application/ChurchProjection.Application.csproj" />
+    <ProjectReference Include="../../src/ChurchProjection.Infrastructure/ChurchProjection.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!--
+    The parsers are Infrastructure: they touch file formats, not domain rules.
+    This project references Infrastructure directly rather than resolving them
+    through DI, because the thing under test is the parse, not the wiring.
+  -->
+
+  <ItemGroup>
+    <None Include="../fixtures/**" CopyToOutputDirectory="PreserveNewest" LinkBase="fixtures" />
+  </ItemGroup>
+
+</Project>

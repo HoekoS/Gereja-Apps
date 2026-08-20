@@ -1,0 +1,41 @@
+meta {
+  name: SYS-SEC-03 unpaired write rejected
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "clear"
+  }
+}
+
+assert {
+  res.status: eq 401
+}
+
+tests {
+  test("SYS-SEC-03 [CRITICAL]: a live command without pairing is refused", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("SYS-SEC-03: the refusal names a code, not a stack trace", function() {
+    expect(res.getBody().error).to.have.property("code");
+    expect(JSON.stringify(res.getBody())).to.not.match(/at .*\.mjs:/);
+  });
+}
+
+docs {
+  Traces URS-SEC-01, FR-SEC-01. Runs first, before any pairing, so the cookie
+  jar is empty.
+
+  Requires the server started with PAIR_REQUIRE_ALL=1. Without it this request
+  originates from loopback, is exempt under FR-SEC-08, and the test passes
+  vacuously by failing.
+}

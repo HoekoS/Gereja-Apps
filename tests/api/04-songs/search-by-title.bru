@@ -1,0 +1,36 @@
+meta {
+  name: SYS-SNG-01 search songs by title
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/songs?q=Kasih
+  body: none
+  auth: none
+}
+
+params:query {
+  q: Kasih
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const results = res.getBody().results;
+  if (results.length > 0) bru.setVar("songId", results[0].id);
+}
+
+tests {
+  test("SYS-SNG-01: a title word finds the song", function() {
+    const results = res.getBody().results;
+    expect(results.length).to.be.above(0);
+    expect(results[0]).to.include.keys("id", "title");
+  });
+}
+
+docs {
+  Traces FR-LIB-13, URS-SONG-05. Stores a song id for later cases.
+}

@@ -1,0 +1,37 @@
+meta {
+  name: SYS-MED-01 media streams with range support
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/media/{{mediaId}}/stream
+  body: none
+  auth: none
+}
+
+headers {
+  Range: bytes=0-1023
+}
+
+assert {
+  res.status: eq 206
+}
+
+tests {
+  test("SYS-MED-01: a partial request is honoured", function() {
+    expect(res.getStatus()).to.equal(206);
+    expect(res.getHeaders()["content-range"]).to.be.a("string");
+  });
+
+  test("SYS-MED-01: only the requested bytes come back", function() {
+    expect(Number(res.getHeaders()["content-length"])).to.equal(1024);
+  });
+}
+
+docs {
+  Traces FR-MED-03, URS-MED-02. Without range support the video element buffers
+  the whole file before it plays, and seeking is impossible. On a LAN with a
+  large sermon clip that is the difference between an instant start and a
+  visibly frozen screen.
+}

@@ -1,0 +1,36 @@
+meta {
+  name: SYS-LIV-01 the live state is readable
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/live
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-01: the state carries the full shape, not a delta", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("live");
+    expect(body).to.have.property("preview");
+    expect(body).to.have.property("blackout");
+    expect(body).to.have.property("skipped");
+    expect(body).to.have.property("outputsConnected");
+  });
+
+  test("SYS-LIV-01: skipped is a list, empty at the start", function() {
+    expect(res.getBody().skipped).to.eql([]);
+  });
+}
+
+docs {
+  Traces FR-LIV-01, URS-AVL-03. A control screen that reloads mid-service must
+  be able to recover everything it needs from one read, which is why the server
+  never sends deltas.
+}

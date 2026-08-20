@@ -1,0 +1,40 @@
+meta {
+  name: SYS-LIV-06 advance at the last page holds
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "advance"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-06 [CRITICAL]: holding at the end is not an error", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("SYS-LIV-06 [CRITICAL]: it does not wrap and does not fall into the next item", function() {
+    const live = res.getBody().live;
+    expect(live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(live.pageIndex).to.equal(Number(bru.getVar("lastPageIndex")));
+  });
+}
+
+docs {
+  Traces FR-LIV-07, URS-LIVE-05. Mirrors UNT-LIV-07. The failure this guards
+  against is visible to the whole room: the operator taps once too often at the
+  end of the last verse and the screen jumps back to verse one, or straight into
+  whatever comes next in the order.
+}

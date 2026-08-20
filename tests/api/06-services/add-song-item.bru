@@ -1,0 +1,44 @@
+meta {
+  name: SYS-SVC-02 add a song item to the order
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/services/{{serviceId}}/items
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "kind": "song",
+    "label": "Lagu Pembuka",
+    "ref": { "songId": "{{songId}}" }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+  bru.setVar("songItemId", res.getBody().id);
+}
+
+tests {
+  test("SYS-SVC-02: the item lands at the end of the order", function() {
+    const body = res.getBody();
+    expect(body.kind).to.equal("song");
+    expect(body.position).to.equal(0);
+  });
+
+  test("SYS-SVC-02: the item references the song rather than copying it", function() {
+    expect(res.getBody().ref.songId).to.equal(bru.getVar("songId"));
+  });
+}
+
+docs {
+  Traces FR-SVC-02, FR-SVC-03, URS-PREP-02. The reference-not-copy assertion is
+  what makes SYS-SVC-05b meaningful: deleting the item must not delete the song.
+}

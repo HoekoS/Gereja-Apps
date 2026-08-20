@@ -1,0 +1,21 @@
+services:
+  api:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./.data:/data
+    environment:
+      Cache__Redis__ConnectionString: redis:6379
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+# `depends_on` waits for the container to start, not for Redis to be ready, and
+# that is fine here on purpose: the cache is optional. If the API wins the race
+# it logs a warning, serves from SQLite, and picks the cache up on a later
+# request. A healthcheck gate would hide a failure mode worth exercising.

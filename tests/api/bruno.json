@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Church Projection API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

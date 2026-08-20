@@ -1,0 +1,36 @@
+meta {
+  name: SYS-BIB-05 search verse text
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/bible/search?q=terang
+  body: none
+  auth: none
+}
+
+params:query {
+  q: terang
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-BIB-05: a known word finds its verse", function() {
+    const results = res.getBody().results;
+    expect(results.length).to.be.above(0);
+    expect(results[0]).to.include.keys("translationId", "bookId", "chapter", "verse", "text");
+  });
+
+  test("SYS-BIB-05: results are capped", function() {
+    expect(res.getBody().results.length).to.be.at.most(100);
+  });
+}
+
+docs {
+  Traces FR-LIB-07, URS-BIB-04. The cap exists so a common word cannot return
+  thirty thousand rows to a booth machine mid-service.
+}

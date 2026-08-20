@@ -1,0 +1,39 @@
+meta {
+  name: SYS-LIV-05 advance moves to the next page
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "advance"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-05: paging stays inside the same item", function() {
+    const live = res.getBody().live;
+    expect(live.itemId).to.equal(bru.getVar("liveSongItemId"));
+  });
+
+  test("SYS-LIV-05: the page index moves forward by one, or holds on a one-page item", function() {
+    const expected = Math.min(1, Number(bru.getVar("lastPageIndex")));
+    expect(res.getBody().live.pageIndex).to.equal(expected);
+  });
+}
+
+docs {
+  Traces FR-LIV-06, URS-LIVE-04. Advance is page navigation, never item
+  navigation: moving to the next item is always an explicit preview plus go, so
+  a leaned-on key cannot walk the output through the rest of the service.
+}

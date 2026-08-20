@@ -1,0 +1,31 @@
+meta {
+  name: setup read the song page count
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/songs/{{songId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const pages = res.getBody().pages;
+  bru.setVar("lastPageIndex", String(pages.length - 1));
+}
+
+tests {
+  test("setup: the song has at least one page", function() {
+    expect(res.getBody().pages.length).to.be.above(0);
+  });
+}
+
+docs {
+  Not a test. The end-of-item cases must know where the end is; hardcoding a
+  page count would tie this suite to the exact contents of the fixture file.
+}

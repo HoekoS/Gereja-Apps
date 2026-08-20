@@ -1,0 +1,41 @@
+meta {
+  name: SYS-BIB-02 lookup a passage
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/bible/passage?translationId={{translationA}}&bookId=1&chapter=1&verseStart=1&verseEnd=3
+  body: none
+  auth: none
+}
+
+params:query {
+  translationId: {{translationA}}
+  bookId: 1
+  chapter: 1
+  verseStart: 1
+  verseEnd: 3
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-BIB-02: exactly the requested verses come back", function() {
+    const verses = res.getBody().verses;
+    expect(verses.map(v => v.verse)).to.eql([1, 2, 3]);
+  });
+
+  test("SYS-BIB-02: verses are in ascending order with non-empty text", function() {
+    for (const v of res.getBody().verses) {
+      expect(v.text.length).to.be.above(0);
+    }
+  });
+}
+
+docs {
+  Traces FR-LIB-05, URS-BIB-03. "Exactly" matters: an off-by-one here puts an
+  extra verse on the congregation screen.
+}

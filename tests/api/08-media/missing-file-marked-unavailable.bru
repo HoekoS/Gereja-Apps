@@ -1,0 +1,32 @@
+meta {
+  name: SYS-MED-03 a missing file is reported before the service, not during it
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/media/{{missingMediaId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-MED-03 [CRITICAL]: the row is marked unavailable rather than looking fine", function() {
+    expect(res.getBody().available).to.equal(false);
+  });
+
+  test("SYS-MED-03: the operator is told which file is missing", function() {
+    expect(res.getBody().filename).to.be.a("string");
+  });
+}
+
+docs {
+  Traces FR-MED-05, URS-MED-05, URS-AVL-05. The library must be honest about a
+  file it can no longer find. This is what lets the preparer see the problem on
+  Saturday evening; UNT-LIV-13 covers the last line of defence, where go is
+  refused if it somehow reaches Sunday.
+}

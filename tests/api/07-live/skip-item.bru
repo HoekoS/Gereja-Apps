@@ -1,0 +1,41 @@
+meta {
+  name: SYS-LIV-11 skipping an item marks it without touching the output
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "skip",
+    "itemId": "{{verseItemId}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-LIV-11: the item is recorded as skipped", function() {
+    expect(res.getBody().skipped).to.include(bru.getVar("verseItemId"));
+  });
+
+  test("SYS-LIV-11 [CRITICAL]: skipping changes nothing on the screen", function() {
+    const live = res.getBody().live;
+    expect(live.itemId).to.equal(bru.getVar("liveSongItemId"));
+    expect(live.pageIndex).to.equal(0);
+  });
+}
+
+docs {
+  Traces FR-LIV-10, URS-LIVE-09. Skip is a note to the operator, not a
+  projection command. The pastor drops the reading, the operator marks it, and
+  the order stops lying about what is coming next — but the congregation sees
+  nothing happen.
+}

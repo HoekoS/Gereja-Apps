@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChurchProjection.Domain/ChurchProjection.Domain.csproj" />
+    <Project Path="src/ChurchProjection.Application/ChurchProjection.Application.csproj" />
+    <Project Path="src/ChurchProjection.Infrastructure/ChurchProjection.Infrastructure.csproj" />
+    <Project Path="src/ChurchProjection.Api/ChurchProjection.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ChurchProjection.Domain.Tests/ChurchProjection.Domain.Tests.csproj" />
+    <Project Path="tests/ChurchProjection.Application.Tests/ChurchProjection.Application.Tests.csproj" />
+    <Project Path="tests/ChurchProjection.Api.Tests/ChurchProjection.Api.Tests.csproj" />
+  </Folder>
+</Solution>

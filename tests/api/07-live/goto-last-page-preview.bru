@@ -1,0 +1,35 @@
+meta {
+  name: setup stage the last page of the song
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/live/command
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "preview",
+    "itemId": "{{liveSongItemId}}",
+    "pageIndex": {{lastPageIndex}}
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("setup: the last page is staged", function() {
+    expect(res.getBody().preview.pageIndex).to.equal(Number(bru.getVar("lastPageIndex")));
+  });
+}
+
+docs {
+  Not a test. Puts the run at the end of the item so SYS-LIV-06 can push past
+  it. Also exercises FR-LIV-03's pageIndex argument, which the operator uses to
+  jump straight to a chorus.
+}

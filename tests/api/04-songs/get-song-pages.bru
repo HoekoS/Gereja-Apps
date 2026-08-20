@@ -1,0 +1,38 @@
+meta {
+  name: SYS-SNG-03 song pages and labels
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/songs/{{songId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SNG-03: pages come back in position order", function() {
+    const pages = res.getBody().pages;
+    expect(pages.length).to.be.above(0);
+    const positions = pages.map(p => p.position);
+    expect(positions).to.eql([...positions].sort((a, b) => a - b));
+  });
+
+  test("SYS-SNG-03: the Indonesian section label survives verbatim", function() {
+    // FR-LIB-12 / URS-SONG-04. Not "Chorus", not "REFF".
+    const labels = res.getBody().pages.map(p => p.sectionLabel);
+    expect(labels).to.include("Reff");
+  });
+
+  test("SYS-SNG-03: author and CCLI round-trip", function() {
+    expect(res.getBody()).to.include.keys("author", "ccli");
+  });
+}
+
+docs {
+  Traces FR-LIB-11, FR-LIB-12, URS-SONG-07.
+}

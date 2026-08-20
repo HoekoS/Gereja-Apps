@@ -1,0 +1,33 @@
+meta {
+  name: SYS-IMP-02b library unchanged after rejection
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/songs
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-IMP-02 [CRITICAL]: the rejected import wrote nothing", function() {
+    const results = res.getBody().results;
+    expect(String(results.length)).to.equal(bru.getVar("songCountBefore"));
+  });
+
+  test("SYS-IMP-02 [CRITICAL]: the library contents are identical, not merely the same size", function() {
+    const ids = JSON.stringify(res.getBody().results.map(s => s.id).sort());
+    expect(ids).to.equal(bru.getVar("songListBefore"));
+  });
+}
+
+docs {
+  Traces FR-IMP-06, URS-AVL-06. This is the case that proves "never a
+  half-imported Bible". A count comparison alone would miss a delete-and-add,
+  so the id list is compared too.
+}

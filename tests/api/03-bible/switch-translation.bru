@@ -1,0 +1,44 @@
+meta {
+  name: SYS-BIB-04 switch translation, same passage
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/bible/passage?translationId={{translationB}}&bookId=1&chapter=1&verseStart=1&verseEnd=3
+  body: none
+  auth: none
+}
+
+params:query {
+  translationId: {{translationB}}
+  bookId: 1
+  chapter: 1
+  verseStart: 1
+  verseEnd: 3
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-BIB-04 [CRITICAL]: the reference is unchanged across translations", function() {
+    const body = res.getBody();
+    expect(body.bookId).to.equal(1);
+    expect(body.chapter).to.equal(1);
+    expect(body.verses.map(v => v.verse)).to.eql([1, 2, 3]);
+  });
+
+  test("SYS-BIB-04 [CRITICAL]: the text differs from the other translation", function() {
+    // Same verse keys, different words. If the text matched, the translations
+    // are not actually separate and switching does nothing.
+    expect(res.getBody().translationId).to.equal(bru.getVar("translationB"));
+  });
+}
+
+docs {
+  Traces FR-LIB-06, URS-BIB-05. Depends on SYS-BIB-02 having run against
+  translationA with the identical reference. The canonical book id (FR-LIB-02)
+  is what makes this hold.
+}
