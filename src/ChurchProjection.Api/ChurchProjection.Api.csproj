@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\ChurchProjection.Application\ChurchProjection.Application.csproj" />
+    <ProjectReference Include="..\ChurchProjection.Infrastructure\ChurchProjection.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

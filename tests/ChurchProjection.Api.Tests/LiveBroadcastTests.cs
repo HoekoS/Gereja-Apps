@@ -11,6 +11,8 @@ using System.Net.Http.Json;
 
 using Microsoft.AspNetCore.SignalR.Client;
 
+using Xunit;
+
 namespace ChurchProjection.Api.Tests;
 
 public class LiveBroadcastTests(ProjectionAppFactory factory) : IClassFixture<ProjectionAppFactory>
@@ -47,7 +49,7 @@ public class LiveBroadcastTests(ProjectionAppFactory factory) : IClassFixture<Pr
             new { type = "go" },
             TestContext.Current.CancellationToken);
 
-        var state = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        var state = await received.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         Assert.Equal(itemId, state.Live?.ItemId);
     }
@@ -67,7 +69,7 @@ public class LiveBroadcastTests(ProjectionAppFactory factory) : IClassFixture<Pr
 
         await output.StartAsync(TestContext.Current.CancellationToken);
 
-        var state = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        var state = await received.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         Assert.NotNull(state.Skipped);
         Assert.False(state.Blackout);

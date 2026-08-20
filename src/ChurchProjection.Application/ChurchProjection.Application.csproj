@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\ChurchProjection.Domain\ChurchProjection.Domain.csproj" />
+  </ItemGroup>
+</Project>
