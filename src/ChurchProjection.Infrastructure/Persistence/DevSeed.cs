@@ -59,6 +59,35 @@ public static class DevSeed
         song.Pages.Add(new SongPage { Position = 1, SectionLabel = "Reff", Text = "Rahmat-Nya tidak berkesudahan, selalu baru setiap pagi" });
         song.Pages.Add(new SongPage { Position = 2, SectionLabel = "Bait 2", Text = "Setiap pagi baru kurasakan" });
         db.Songs.Add(song);
+        // SYS-MED-00 through SYS-MED-03 need both halves of the media failure:
+        // a file that is there, and a row whose file was moved. The present file
+        // is written here so the fixtures folder does not need a binary, and it
+        // is deliberately larger than the 1 KiB range SYS-MED-01 asks for.
+        var mediaRoot = Path.GetDirectoryName(db.Database.GetDbConnection().DataSource)!;
+        mediaRoot = Path.Combine(mediaRoot, "media");
+        Directory.CreateDirectory(mediaRoot);
+
+        var presentPath = Path.Combine(mediaRoot, "seed-clip.bin");
+        await File.WriteAllBytesAsync(presentPath, new byte[64 * 1024], ct);
+
+        db.Media.AddRange(
+            new MediaItem
+            {
+                Id = "med_present",
+                Kind = "video/mp4",
+                Filename = "seed-clip.bin",
+                Path = presentPath,
+                DurationMs = 12_000,
+                Width = 1920,
+                Height = 1080,
+            },
+            new MediaItem
+            {
+                Id = "med_missing",
+                Kind = "image/jpeg",
+                Filename = "moved-by-someone.jpg",
+                Path = Path.Combine(mediaRoot, "moved-by-someone.jpg"),
+            });
 
         await db.SaveChangesAsync(ct);
     }

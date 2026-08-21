@@ -78,8 +78,9 @@ Switching translation on the same passage (`FR-LIB-06`) is `GET /api/bible/passa
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| GET | `/api/media` | paired | Array of `{ id, kind, filename, durationMs, width, height, available }`. `available` is false when the file is missing or unreadable (`FR-LIB-23`). |
-| GET | `/api/media/:id/file` | paired | The binary. Supports `Range` (`IF-SW-03`). 404 `MEDIA_FILE_MISSING` when absent. |
+| GET | `/api/media` | paired | `{ results: [{ id, kind, filename, durationMs, width, height, available }] }`. `available` is false when the file is missing or unreadable (`FR-LIB-23`). |
+| GET | `/api/media/:id` | paired | One media item in the same shape. 404 `MEDIA_NOT_FOUND`. |
+| GET | `/api/media/:id/stream` | paired | The binary. Supports `Range` (`IF-SW-03`). 404 `MEDIA_FILE_MISSING` when the row exists but the file does not. |
 | POST | `/api/media` | paired | `multipart/form-data`, field `file`. Filename sanitised; paths resolving outside the media directory are rejected 400 `BAD_FILENAME` (`NFR-SEC-04`). |
 
 ### Import
