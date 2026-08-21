@@ -12,6 +12,7 @@ await app.PrepareDatabaseAsync();
 app.UseRateLimiter();
 app.MapAccess();
 app.MapBible();
+app.MapSongs();
 
 app.MapGet("/healthz", () => Results.Json(new
 {
