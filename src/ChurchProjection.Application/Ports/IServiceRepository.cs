@@ -1,4 +1,5 @@
 using ChurchProjection.Domain.Library;
+using ChurchProjection.Domain.Live;
 using ChurchProjection.Domain.Services;
 
 namespace ChurchProjection.Application.Ports;
@@ -8,6 +9,13 @@ public sealed record ServiceSummary(string Id, string Name, DateOnly ServiceDate
 public interface IServiceRepository
 {
     Task<ServicePlan?> FindAsync(ServiceId id, CancellationToken ct);
+
+    /// <summary>
+    /// The service that holds this item. The live state attaches itself to a
+    /// service when the operator previews something in it, so there is no separate
+    /// "open the service" step to forget.
+    /// </summary>
+    Task<ServicePlan?> FindByItemAsync(ItemId itemId, CancellationToken ct);
 
     Task<IReadOnlyList<ServiceSummary>> ListAsync(CancellationToken ct);
 

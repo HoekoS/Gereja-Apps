@@ -1,5 +1,6 @@
 using ChurchProjection.Application.Ports;
 using ChurchProjection.Domain.Library;
+using ChurchProjection.Domain.Live;
 using ChurchProjection.Domain.Services;
 using ChurchProjection.Infrastructure.Persistence;
 
@@ -11,6 +12,9 @@ public sealed class ServiceRepository(ProjectionDbContext db) : IServiceReposito
 {
     public Task<ServicePlan?> FindAsync(ServiceId id, CancellationToken ct) =>
         db.Services.SingleOrDefaultAsync(s => s.Id == id, ct);
+
+    public Task<ServicePlan?> FindByItemAsync(ItemId itemId, CancellationToken ct) =>
+        db.Services.SingleOrDefaultAsync(s => s.Items.Any(item => item.Id == itemId.Value), ct);
 
     public async Task<IReadOnlyList<ServiceSummary>> ListAsync(CancellationToken ct) =>
         await db.Services.AsNoTracking()

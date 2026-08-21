@@ -30,7 +30,7 @@ tests {
   });
 
   test("SYS-LIV-02 [CRITICAL]: the live slot is untouched", function() {
-    expect(res.getBody().live.itemId).to.equal(null);
+    expect(res.getBody().live).to.equal(null);
   });
 }
 

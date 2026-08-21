@@ -26,4 +26,7 @@ public sealed class MediaRepository(ProjectionDbContext db) : IMediaRepository
     {
         await db.Media.Where(m => m.Id == id).ExecuteDeleteAsync(ct);
     }
+
+    public async Task<bool> IsAvailableAsync(MediaId id, CancellationToken ct) =>
+        await FindAsync(id, ct) is { } item && File.Exists(item.Path);
 }

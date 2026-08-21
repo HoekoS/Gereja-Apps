@@ -1,5 +1,6 @@
 using ChurchProjection.Api.Options;
 using ChurchProjection.Application.Import;
+using ChurchProjection.Application.Live;
 using ChurchProjection.Application.Ports;
 using ChurchProjection.Infrastructure.Caching;
 using ChurchProjection.Infrastructure.Import;
@@ -11,6 +12,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ChurchProjection.Api;
 
@@ -30,11 +32,12 @@ public static class CompositionRoot
 
         RefuseTestSettingsInProduction(builder.Environment, access);
 
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(storage.DatabasePath))!);
-        Directory.CreateDirectory(storage.MediaRoot);
-
-        builder.Services.AddDbContext<ProjectionDbContext>(options =>
-            options.UseSqlite($"Data Source={storage.DatabasePath}"));
+        // Resolved per scope, not here: WebApplicationFactory layers its test
+        // configuration on after AddProjection has run, so an eagerly captured
+        // path would send the tests at the developer own database.
+        builder.Services.AddDbContext<ProjectionDbContext>((provider, options) =>
+            options.UseSqlite(
+                $"Data Source={provider.GetRequiredService<IOptions<StorageOptions>>().Value.DatabasePath}"));
 
         if (string.IsNullOrWhiteSpace(cache.Redis.ConnectionString))
         {
@@ -99,6 +102,11 @@ public static class CompositionRoot
         builder.Services.AddSingleton<IImportReader>(_ => ImportService.WithDefaultParsers());
         builder.Services.AddScoped<ImportLibrary>();
 
+        builder.Services.AddSignalR();
+        builder.Services.AddSingleton<Live.OutputCounter>();
+        builder.Services.AddScoped<ContentResolver>();
+        builder.Services.AddScoped<LiveCommandHandler>();
+
         // Ticket cookies must survive a restart, or every restart un-pairs the
         // whole team mid-service.
         builder.Services.AddDataProtection()
@@ -134,6 +142,11 @@ public static class CompositionRoot
     public static async Task PrepareDatabaseAsync(this WebApplication app)
     {
         await using var scope = app.Services.CreateAsyncScope();
+        var storage = scope.ServiceProvider.GetRequiredService<IOptions<StorageOptions>>().Value;
+
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(storage.DatabasePath))!);
+        Directory.CreateDirectory(storage.MediaRoot);
+
         var db = scope.ServiceProvider.GetRequiredService<ProjectionDbContext>();
 
         await db.ApplyMigrationsAsync(CancellationToken.None);

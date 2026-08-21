@@ -8,4 +8,5 @@ public enum RefusalCode
     MediaUnavailable,
     UnknownItem,
     PageOutOfRange,
+    UnknownCommand,
 }

@@ -1,5 +1,6 @@
 using ChurchProjection.Api;
 using ChurchProjection.Api.Endpoints;
+using ChurchProjection.Api.Live;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,8 @@ app.MapSongs();
 app.MapImport();
 app.MapServices();
 app.MapMedia();
+app.MapLive();
+app.MapHub<LiveHub>("/hub/live");
 
 app.MapGet("/healthz", () => Results.Json(new
 {

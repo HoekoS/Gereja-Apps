@@ -11,4 +11,7 @@ public interface IMediaRepository
     Task<MediaId> AddAsync(MediaItem item, CancellationToken ct);
 
     Task RemoveAsync(MediaId id, CancellationToken ct);
+
+    /// <summary>Whether the file behind this row is on disk right now (FR-LIV-17).</summary>
+    Task<bool> IsAvailableAsync(MediaId id, CancellationToken ct);
 }

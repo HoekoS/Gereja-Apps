@@ -38,7 +38,19 @@ public class LiveBroadcastTests(ProjectionAppFactory factory) : IClassFixture<Pr
         await using var output = ConnectOutput();
 
         var received = new TaskCompletionSource<LiveStateDto>();
-        output.On<LiveStateDto>("StateChanged", state => received.TrySetResult(state));
+
+        // Full state also arrives on connect (INT-07, asserted below), and it
+        // arrives before these commands are issued. Resolving on the first
+        // state that carries a live item is what "the command reached the
+        // second client" actually means; resolving on the first state at all
+        // would only ever observe the connect snapshot.
+        output.On<LiveStateDto>("StateChanged", state =>
+        {
+            if (state.Live is not null)
+            {
+                received.TrySetResult(state);
+            }
+        });
         await output.StartAsync(TestContext.Current.CancellationToken);
 
         var itemId = await SeedOneItemServiceAsync(client);
