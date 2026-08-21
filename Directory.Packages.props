@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <ItemGroup Label="Testing">
@@ -17,6 +18,19 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
+  </ItemGroup>
+
+  <!--
+    Transitive pins, not direct dependencies. EF Core 10.0.0 drags in versions
+    of both that carry high-severity advisories (NU1903), and NU1903 is an
+    error here because TreatWarningsAsErrors is on. Pinned forward rather than
+    suppressed: the warning is correct and the fixed versions exist.
+      SQLitePCLRaw.lib.e_sqlite3  2.1.11 -> GHSA-2m69-gcr7-jv3q
+      System.Security.Cryptography.Xml 9.0.0 -> GHSA-23rf-6693-g89p and others
+  -->
+  <ItemGroup Label="Security pins">
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.11" />
   </ItemGroup>
 
   <!--
