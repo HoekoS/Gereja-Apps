@@ -6,7 +6,10 @@ using ChurchProjection.Infrastructure.Import;
 using ChurchProjection.Infrastructure.Persistence;
 using ChurchProjection.Infrastructure.Repositories;
 
+using System.Threading.RateLimiting;
+
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChurchProjection.Api;
@@ -54,6 +57,36 @@ public static class CompositionRoot
         builder.Services.AddScoped<ILiveStateRepository, LiveStateRepository>();
         builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        builder.Services.AddScoped<Access.PinService>();
+
+        builder.Services.AddRateLimiter(limiter =>
+        {
+            // Partitioned by remote address, not global: NFR-SEC-05 asks that one
+            // phone guessing PINs must not lock out the operator's tablet, and a
+            // named fixed-window limiter is a single shared partition.
+            limiter.AddPolicy("pair", http => RateLimitPartition.GetFixedWindowLimiter(
+                http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = access.PairAttemptsPerWindow,
+                    Window = access.PairWindow,
+                    QueueLimit = 0,
+                }));
+
+            limiter.OnRejected = async (context, ct) =>
+            {
+                context.HttpContext.Response.StatusCode = 429;
+                // Set explicitly: the framework does not add Retry-After for a
+                // fixed window, and rate-limit-pairing.bru asserts it is there.
+                context.HttpContext.Response.Headers.RetryAfter =
+                    ((int)access.PairWindow.TotalSeconds).ToString();
+
+                await context.HttpContext.Response.WriteAsJsonAsync(
+                    new ApiError(new ApiError.Body("TOO_MANY_ATTEMPTS", "Too many PIN attempts. Wait a minute.")),
+                    ct);
+            };
+        });
 
         // The decorator, not the EF repository, is what the application resolves.
         builder.Services.AddScoped<VerseRepository>();
