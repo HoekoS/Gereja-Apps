@@ -10,6 +10,15 @@
   </PropertyGroup>
 
   <!--
+    xunit.v3 3.0.0 ships no implicit Xunit using, and the test suite was written
+    without `using Xunit;` lines. Declared once here rather than in every test
+    project.
+  -->
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!--
     The dependency rule is enforced by review, not by tooling. Domain references
     nothing; Application references Domain; Infrastructure references
     Application; Api references all three. A ProjectReference pointing the wrong
