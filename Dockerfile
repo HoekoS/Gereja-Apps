@@ -6,8 +6,7 @@ WORKDIR /source
 
 COPY Directory.Build.props Directory.Packages.props ChurchProjection.slnx ./
 COPY src/ src/
-RUN dotnet restore ChurchProjection.slnx
-RUN dotnet publish src/ChurchProjection.Api -c Release -o /app --no-restore
+RUN dotnet publish src/ChurchProjection.Api -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app

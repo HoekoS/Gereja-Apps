@@ -5,6 +5,7 @@ using ChurchProjection.Api.Live;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddProjection();
+builder.Services.AddWindowsService();
 
 var app = builder.Build();
 
