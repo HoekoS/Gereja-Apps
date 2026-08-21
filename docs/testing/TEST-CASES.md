@@ -246,6 +246,7 @@ These are the cases the product exists for. INT-01 to INT-03 and INT-07 to INT-1
 | INT-13 | NFR-REL-09, URS-AVL-01 | **C** | **When** the server is started with no cache configured, **then** it starts and serves normally. A cache is never a precondition for the app running. |
 | INT-14 | NFR-REL-09 | **C** | **Given** the cache is configured but unreachable, **when** a verse page is requested, **then** it is served from the database, one warning is logged, and no request fails. |
 | INT-15 | FR-LIB-05, FR-LIB-13 | **C** | **When** the migrations are applied and a verse row is inserted, **then** the FTS5 index contains it. An index is only ever wrong against a real database, which is why there is no mock here. |
+| INT-16 | FR-SVC-02, FR-SVC-04 | | **When** a service with items is saved and reloaded, **then** the items come back in position order with their kind-specific `ref` intact, and a reorder that is not a permutation is refused. |
 
 ## 8. Performance
 
