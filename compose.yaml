@@ -3,17 +3,26 @@ services:
     build: .
     ports:
       - "5000:5000"
-    volumes:
-      - ./.data:/data
     environment:
-      Cache__Redis__ConnectionString: redis:6379
+      ASPNETCORE_ENVIRONMENT: Testing
+      Access__TestPin: "123456"
+      Access__RequirePairingFromLoopback: "true"
+      Cache__Redis__ConnectionString: "cache:6379"
+    volumes:
+      - projection-data:/data
     depends_on:
-      - redis
+      - cache
 
-  redis:
+  # Present so the real Redis adapter is exercised somewhere other than
+  # production. The booth runs without this container and must keep working
+  # either way (INT-13) — CacheFallbackTests covers that failure path, this
+  # compose file covers the success path.
+  cache:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+volumes:
+  projection-data:
 
 # `depends_on` waits for the container to start, not for Redis to be ready, and
 # that is fine here on purpose: the cache is optional. If the API wins the race

@@ -19,5 +19,6 @@ ENV Storage__DatabasePath=/data/projection.db \
     Storage__MediaRoot=/data/media \
     ASPNETCORE_HTTP_PORTS=5000
 
+VOLUME /data
 EXPOSE 5000
 ENTRYPOINT ["dotnet", "ChurchProjection.Api.dll"]
