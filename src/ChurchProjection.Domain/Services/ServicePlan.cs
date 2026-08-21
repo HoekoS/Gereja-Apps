@@ -15,6 +15,12 @@ public sealed class ServicePlan
     /// <summary>Always in position order.</summary>
     public IReadOnlyList<ServiceItem> Items => _items;
 
+    public void Rename(string name, DateOnly serviceDate)
+    {
+        Name = name;
+        ServiceDate = serviceDate;
+    }
+
     public void Load(IEnumerable<ServiceItem> items)
     {
         _items.Clear();

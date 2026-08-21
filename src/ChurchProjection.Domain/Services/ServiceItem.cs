@@ -11,4 +11,10 @@ public sealed class ServiceItem
     public required ItemRef Ref { get; set; }
 
     public int Position { get; set; }
+
+    public void Update(string label, ItemRef reference)
+    {
+        Label = label;
+        Ref = reference;
+    }
 }

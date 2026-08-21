@@ -14,6 +14,7 @@ app.MapAccess();
 app.MapBible();
 app.MapSongs();
 app.MapImport();
+app.MapServices();
 
 app.MapGet("/healthz", () => Results.Json(new
 {
