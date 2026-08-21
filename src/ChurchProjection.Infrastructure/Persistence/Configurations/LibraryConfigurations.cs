@@ -70,7 +70,10 @@ public sealed class SongConfiguration : IEntityTypeConfiguration<Song>
             pages.ToTable("song_pages");
             pages.WithOwner().HasForeignKey("song_id");
             pages.HasKey("song_id", nameof(SongPage.Position));
-            pages.Property(p => p.Position).HasColumnName("position");
+            // Position is part of the key and is set by the aggregate, not by
+            // SQLite. Without this EF treats an integer key as store-generated
+            // and leaves the column out of the INSERT.
+            pages.Property(p => p.Position).HasColumnName("position").ValueGeneratedNever();
             pages.Property(p => p.SectionLabel).HasColumnName("section_label");
             pages.Property(p => p.Text).HasColumnName("text").IsRequired();
         });

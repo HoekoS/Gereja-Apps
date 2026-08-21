@@ -1,6 +1,12 @@
+using ChurchProjection.Api;
+
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddProjection();
+
 var app = builder.Build();
+
+await app.PrepareDatabaseAsync();
 
 app.MapGet("/healthz", () => Results.Json(new
 {
