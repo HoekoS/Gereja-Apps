@@ -10,6 +10,7 @@ using ChurchProjection.Infrastructure.Repositories;
 using System.Threading.RateLimiting;
 
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -28,6 +29,13 @@ public static class CompositionRoot
                 options.MakeAbsolute(environment.ContentRootPath));
 
         builder.Services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.Section));
+
+        // Raising Kestrel's body cap on the upload routes is only half of it:
+        // ReadFormAsync applies its own 128 MB multipart default, and blowing
+        // that throws rather than answering the contract's 413. Sized to the
+        // largest route; every route is still gated by its own body cap first.
+        builder.Services.Configure<FormOptions>(options =>
+            options.MultipartBodyLengthLimit = 500L * 1024 * 1024);
 
         builder.Services.AddOptions<AccessOptions>()
             .Bind(configuration.GetSection(AccessOptions.Section))

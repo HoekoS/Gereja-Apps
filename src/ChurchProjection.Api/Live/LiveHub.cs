@@ -60,7 +60,7 @@ public sealed class LiveHub(
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        if (Context.GetHttpContext()?.Request.Query["role"].ToString() == "output")
+        if (Context.Items.TryGetValue(RoleKey, out var role) && (string?)role == "output")
         {
             outputs.Decrement();
             await BroadcastAsync();
