@@ -8,7 +8,10 @@ namespace ChurchProjection.Api.Access;
 /// than the most recent Saturday midnight (FR-SEC-03). Lazily, because a weekly
 /// scheduler on a machine that is switched off six days a week rotates nothing.
 /// </summary>
-public sealed class PinService(ISettingsRepository settings, Microsoft.Extensions.Options.IOptions<Options.AccessOptions> access)
+public sealed class PinService(
+    ISettingsRepository settings,
+    Microsoft.Extensions.Options.IOptions<Options.AccessOptions> access,
+    ILogger<PinService> log)
 {
     private const string PinKey = "pin";
     private const string RotatedAtKey = "pin_rotated_at";
@@ -36,6 +39,12 @@ public sealed class PinService(ISettingsRepository settings, Microsoft.Extension
 
                 await settings.SetAsync(PinKey, stored, ct);
                 await settings.SetAsync(RotatedAtKey, rotatedAt.ToString("o"), ct);
+
+                // FR-SEC-11. The console is the booth's own screen and this is a
+                // LAN device PIN that /api/pin already serves to anyone standing
+                // at that machine; without it the volunteer has no way to learn
+                // the PIN they are supposed to read out.
+                log.LogInformation("Pairing PIN rotated to {Pin} at {RotatedAt:g}.", stored, rotatedAt);
             }
 
             return (stored, rotatedAt);

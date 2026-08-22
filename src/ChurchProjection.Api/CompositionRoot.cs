@@ -28,15 +28,19 @@ public static class CompositionRoot
                 options.MakeAbsolute(environment.ContentRootPath));
 
         builder.Services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.Section));
-        builder.Services.Configure<AccessOptions>(configuration.GetSection(AccessOptions.Section));
+
+        builder.Services.AddOptions<AccessOptions>()
+            .Bind(configuration.GetSection(AccessOptions.Section))
+            .ValidateOnStart();
+
+        builder.Services.AddSingleton<IValidateOptions<AccessOptions>>(
+            new TestSettingsRefusedInProduction(builder.Environment));
 
         var storage = configuration.GetSection(StorageOptions.Section).Get<StorageOptions>() ?? new StorageOptions();
 
         storage.MakeAbsolute(builder.Environment.ContentRootPath);
         var cache = configuration.GetSection(CacheOptions.Section).Get<CacheOptions>() ?? new CacheOptions();
         var access = configuration.GetSection(AccessOptions.Section).Get<AccessOptions>() ?? new AccessOptions();
-
-        RefuseTestSettingsInProduction(builder.Environment, access);
 
         // Resolved per scope, not here: WebApplicationFactory layers its test
         // configuration on after AddProjection has run, so an eagerly captured
@@ -71,9 +75,11 @@ public static class CompositionRoot
 
         builder.Services.AddRateLimiter(limiter =>
         {
-            // Partitioned by remote address, not global: NFR-SEC-05 asks that one
-            // phone guessing PINs must not lock out the operator's tablet, and a
-            // named fixed-window limiter is a single shared partition.
+            // Two limits, and pairing has to get past both. Partitioning by
+            // remote address is the right first line — NFR-SEC-05 asks that one
+            // phone guessing PINs must not lock out the operator's tablet — but
+            // it bounds only what one address can try, and 5 a minute is 50,400
+            // a week from each of however many addresses a laptop cares to bind.
             limiter.AddPolicy("pair", http => RateLimitPartition.GetFixedWindowLimiter(
                 http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                 _ => new FixedWindowRateLimiterOptions
@@ -83,13 +89,32 @@ public static class CompositionRoot
                     QueueLimit = 0,
                 }));
 
+            // The backstop that makes the total finite. Scoped to the pairing
+            // route by hand because the global limiter otherwise sees every
+            // request in the app, and nothing else here wants throttling.
+            limiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(http =>
+                http.Request.Path.StartsWithSegments("/api/pair")
+                    ? RateLimitPartition.GetFixedWindowLimiter("pair", _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = access.PairAttemptsPerGlobalWindow,
+                        Window = access.PairGlobalWindow,
+                        QueueLimit = 0,
+                    })
+                    : RateLimitPartition.GetNoLimiter<string>("unlimited"));
+
             limiter.OnRejected = async (context, ct) =>
             {
                 context.HttpContext.Response.StatusCode = 429;
                 // Set explicitly: the framework does not add Retry-After for a
                 // fixed window, and rate-limit-pairing.bru asserts it is there.
+                // Read off the lease so a global rejection quotes the global
+                // window rather than the shorter per-address one.
+                var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var window)
+                    ? window
+                    : access.PairWindow;
+
                 context.HttpContext.Response.Headers.RetryAfter =
-                    ((int)access.PairWindow.TotalSeconds).ToString();
+                    ((int)retryAfter.TotalSeconds).ToString();
 
                 await context.HttpContext.Response.WriteAsJsonAsync(
                     new ApiError(new ApiError.Body("TOO_MANY_ATTEMPTS", "Too many PIN attempts. Wait a minute.")),
@@ -122,26 +147,35 @@ public static class CompositionRoot
 
     /// <summary>
     /// A test convenience that survives into a real start is not a test
-    /// convenience, it is a hole. Refusing at composition time means the server
-    /// will not start rather than starting wrong.
+    /// convenience, it is a hole. Written as an <see cref="IValidateOptions{T}"/>
+    /// so it judges the same instance the pair gate resolves per request, rather
+    /// than a snapshot bound at composition time that a reload could leave
+    /// behind. <c>ValidateOnStart</c> keeps the failure at startup, so the server
+    /// still refuses to start rather than starting wrong.
     /// </summary>
-    private static void RefuseTestSettingsInProduction(IHostEnvironment environment, AccessOptions access)
+    private sealed class TestSettingsRefusedInProduction(IHostEnvironment environment)
+        : IValidateOptions<AccessOptions>
     {
-        if (!environment.IsProduction())
+        public ValidateOptionsResult Validate(string? name, AccessOptions options)
         {
-            return;
-        }
+            if (!environment.IsProduction())
+            {
+                return ValidateOptionsResult.Skip;
+            }
 
-        if (!string.IsNullOrWhiteSpace(access.TestPin))
-        {
-            throw new InvalidOperationException(
-                "Access:TestPin is a test-only setting and is refused in Production.");
-        }
+            if (!string.IsNullOrWhiteSpace(options.TestPin))
+            {
+                return ValidateOptionsResult.Fail(
+                    "Access:TestPin is a test-only setting and is refused in Production.");
+            }
 
-        if (access.RequirePairingFromLoopback)
-        {
-            throw new InvalidOperationException(
-                "Access:RequirePairingFromLoopback is a test-only setting and is refused in Production.");
+            if (options.RequirePairingFromLoopback)
+            {
+                return ValidateOptionsResult.Fail(
+                    "Access:RequirePairingFromLoopback is a test-only setting and is refused in Production.");
+            }
+
+            return ValidateOptionsResult.Success;
         }
     }
 
