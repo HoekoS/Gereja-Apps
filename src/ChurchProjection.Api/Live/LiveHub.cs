@@ -9,6 +9,8 @@ namespace ChurchProjection.Api.Live;
 public sealed class LiveHub(
     LiveCommandHandler handler, OutputCounter outputs) : Hub
 {
+    private const string RoleKey = "role";
+
     public override async Task OnConnectedAsync()
     {
         var http = Context.GetHttpContext()!;
@@ -30,6 +32,11 @@ public sealed class LiveHub(
 
             return;
         }
+
+        // The role decided here is the only record of it. SendCommand reads it
+        // back rather than re-reading the query string, so a connection cannot
+        // be one role for the pair check and another for authorisation.
+        Context.Items[RoleKey] = role;
 
         await Groups.AddToGroupAsync(Context.ConnectionId, role);
 
@@ -64,6 +71,17 @@ public sealed class LiveHub(
 
     public async Task SendCommand(LiveCommand command)
     {
+        // FR-SEC-10 lets an output connection skip the PIN only because that
+        // role can issue no command, so the role has to be checked here too —
+        // OnConnectedAsync letting the socket open is not permission to drive it.
+        // SendCommand is the only client-invokable method on this hub; a second
+        // one must repeat this guard or the pair of them must move to an
+        // IHubFilter.
+        if (!Context.Items.TryGetValue(RoleKey, out var role) || role as string is not ("control" or "remote"))
+        {
+            throw new HubException("Only a paired control or remote connection can send commands.");
+        }
+
         _ = await handler.ExecuteAsync(command, Context.ConnectionAborted);
 
         // Refusals are not thrown at the caller here: the broadcast that follows

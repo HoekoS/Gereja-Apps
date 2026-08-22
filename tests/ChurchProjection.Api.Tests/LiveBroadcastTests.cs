@@ -9,6 +9,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
 using Xunit;
@@ -102,6 +103,34 @@ public class LiveBroadcastTests(ProjectionAppFactory factory) : IClassFixture<Pr
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task FR_SEC_10_CRITICAL_an_output_connection_cannot_send_commands()
+    {
+        // FR-SEC-10 exempts the output role from the PIN on the promise that it
+        // can issue no command. Without this test the promise was unkept: the
+        // hub took a command from anything that had managed to connect, and the
+        // other tests in this class only ever listen.
+        var client = factory.CreateClient();
+        await PairAsync(client);
+
+        var before = await client.GetFromJsonAsync<LiveStateDto>(
+            "/api/live", TestContext.Current.CancellationToken);
+
+        await using var output = ConnectOutput();
+        await output.StartAsync(TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<HubException>(() => output.InvokeAsync(
+            "SendCommand",
+            new { type = "blackout", on = true },
+            TestContext.Current.CancellationToken));
+
+        var after = await client.GetFromJsonAsync<LiveStateDto>(
+            "/api/live", TestContext.Current.CancellationToken);
+
+        Assert.Equal(before!.Blackout, after!.Blackout);
+        Assert.Equal(before.Live?.ItemId, after.Live?.ItemId);
     }
 
     [Fact]
