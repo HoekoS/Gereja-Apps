@@ -4,6 +4,7 @@ using ChurchProjection.Application.Ports;
 using ChurchProjection.Domain.Library;
 using ChurchProjection.Infrastructure.Storage;
 
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 
 namespace ChurchProjection.Api.Endpoints;
@@ -77,6 +78,17 @@ public static class MediaEndpoints
             if (!request.HasFormContentType)
             {
                 return ApiError.BadRequest("NOT_MULTIPART", "Send the file as multipart/form-data.");
+            }
+
+            // Kestrel's own default is 30 MB, so without this the check below is
+            // unreachable and a legitimate upload dies with a raw framework 413
+            // instead of the contract-shaped one. Raised per request rather than
+            // globally so only the upload routes are this open.
+            var body = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
+
+            if (body is { IsReadOnly: false })
+            {
+                body.MaxRequestBodySize = MaxUploadBytes;
             }
 
             var form = await request.ReadFormAsync(ct);
