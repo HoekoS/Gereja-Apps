@@ -183,7 +183,50 @@ public static class CompositionRoot
         }
     }
 
+    /// <summary>
+    /// The envelope for the responses the app never wrote itself: an unhandled
+    /// exception, and the statuses the framework produces before or instead of
+    /// an endpoint (404 for an unknown route, 405, 413 from Kestrel, 415 for the
+    /// wrong content type). API-CONTRACT promises the same shape for every
+    /// non-2xx, and a bare ProblemDetails or an empty body is not it. Anything
+    /// that already wrote a body -- which is every error the endpoints return
+    /// deliberately -- is passed through untouched.
+    /// </summary>
+    public static void UseErrorEnvelope(this WebApplication app)
+    {
+        app.UseExceptionHandler(handler => handler.Run(context => WriteError(
+            context,
+            500,
+            "INTERNAL_ERROR",
+            "Something went wrong on the server. The log on the booth machine has the detail.")));
+
+        app.UseStatusCodePages(context =>
+        {
+            var (code, message) = context.HttpContext.Response.StatusCode switch
+            {
+                400 => ("BAD_REQUEST", "That request could not be understood."),
+                401 => ("NOT_PAIRED", "Enter the PIN on this device first."),
+                403 => ("FORBIDDEN", "That is not allowed from this device."),
+                404 => ("NOT_FOUND", "There is nothing at that address."),
+                405 => ("METHOD_NOT_ALLOWED", "That address does not accept this method."),
+                413 => ("FILE_TOO_LARGE", "That upload is larger than the limit."),
+                415 => ("UNSUPPORTED_MEDIA_TYPE", "That kind of content is not accepted here."),
+                var other => ("REQUEST_FAILED", $"The request failed with status {other}."),
+            };
+
+            return WriteError(context.HttpContext, context.HttpContext.Response.StatusCode, code, message);
+        });
+    }
+
+    private static Task WriteError(HttpContext context, int status, string code, string message)
+    {
+        context.Response.StatusCode = status;
+
+        return context.Response.WriteAsJsonAsync(new ApiError(new ApiError.Body(code, message)));
+    }
+
     public static async Task PrepareDatabaseAsync(this WebApplication app)
+
     {
         await using var scope = app.Services.CreateAsyncScope();
         var storage = scope.ServiceProvider.GetRequiredService<IOptions<StorageOptions>>().Value;

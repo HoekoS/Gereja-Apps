@@ -23,6 +23,7 @@ var app = builder.Build();
 
 await app.PrepareDatabaseAsync();
 
+app.UseErrorEnvelope();
 app.UseRateLimiter();
 app.MapAccess();
 app.MapBible();
