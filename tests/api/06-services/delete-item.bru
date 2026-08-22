@@ -11,20 +11,17 @@ delete {
 }
 
 assert {
-  res.status: eq 200
+  res.status: eq 204
 }
 
 tests {
-  test("SYS-SVC-05: the item is gone from the order", function() {
-    const ids = res.getBody().items.map(i => i.id);
-    expect(ids).to.not.include(bru.getVar("songItemId"));
-  });
-
-  test("SYS-SVC-05: the remaining items are renumbered", function() {
-    expect(res.getBody().items.map(i => i.position)).to.eql([0]);
+  test("SYS-SVC-05: a delete answers 204 with no body", function() {
+    expect(res.getStatus()).to.equal(204);
+    expect(res.getBody()).to.satisfy(b => b === undefined || b === null || b === "");
   });
 }
 
 docs {
-  Traces FR-SVC-06, URS-PREP-05.
+  Traces FR-SVC-06, URS-PREP-05. The order after the delete is checked by
+  order-after-delete.bru, because a 204 carries no body to check it in.
 }

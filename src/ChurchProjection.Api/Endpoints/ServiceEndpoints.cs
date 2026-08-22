@@ -128,13 +128,13 @@ public static class ServiceEndpoints
 
             // FR-SVC-07: removing an item removes the item. The song it points
             // at stays in the library, which is what song-still-exists.bru
-            // checks immediately afterwards.
+            // checks two requests later.
             plan.Remove(itemId);
             await services.SaveAsync(plan, ct);
 
-            // The updated order, not 204: delete-item.bru reads the renumbered
-            // items straight out of this response.
-            return Results.Json(Describe(plan));
+            // 204, as the contract says. The renumbered order is not returned
+            // here; order-after-delete.bru reads it back with a GET.
+            return Results.NoContent();
         });
 
         group.MapPost("/{id}/items/reorder", async (

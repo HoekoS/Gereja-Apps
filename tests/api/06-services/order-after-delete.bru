@@ -1,0 +1,31 @@
+meta {
+  name: SYS-SVC-05a the order closes up after a delete
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/services/{{serviceId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("SYS-SVC-05: the item is gone from the order", function() {
+    const ids = res.getBody().items.map(i => i.id);
+    expect(ids).to.not.include(bru.getVar("songItemId"));
+  });
+
+  test("SYS-SVC-05: the remaining items are renumbered", function() {
+    expect(res.getBody().items.map(i => i.position)).to.eql([0]);
+  });
+}
+
+docs {
+  Traces FR-SVC-06, URS-PREP-05. Reads the order back rather than trusting the
+  delete response, which is a 204 by contract.
+}
