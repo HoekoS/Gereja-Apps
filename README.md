@@ -7,9 +7,7 @@ dependency.
 ## Running
 
 - Development: `docker compose up --build`, then `http://localhost:5000`.
-- Tests: `dotnet test`, and against a running API:
-  ```
-  cd tests/api
-  npx @usebruno/cli run 01-health 02-access 03-bible 04-songs 05-import 06-services 07-live 08-media 09-limits --env local
-  ```
+- Tests: `dotnet test`, and against a running API: `npm run test:api` (the whole
+  Bruno collection under `tests/api/`; `npm run test:api:report` also writes
+  `reports/api-results.json`).
 - Booth: see [docs/operations/RUNBOOK.md](docs/operations/RUNBOOK.md).
