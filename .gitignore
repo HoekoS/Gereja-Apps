@@ -11,3 +11,7 @@ TestResults/
 .superpowers/
 data/
 publish/
+.claude/
+.impeccable/
+.tokensave/
+docs/superpowers/
