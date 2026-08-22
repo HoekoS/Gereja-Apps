@@ -1,12 +1,18 @@
 using ChurchProjection.Application.Ports;
 using ChurchProjection.Domain.Library;
 using ChurchProjection.Infrastructure.Persistence;
+using ChurchProjection.Infrastructure.Storage;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace ChurchProjection.Infrastructure.Repositories;
 
-public sealed class MediaRepository(ProjectionDbContext db) : IMediaRepository
+/// <summary>
+/// The media root is passed in rather than stored per row: a row records the
+/// filename and nothing else, so a database restored onto a machine whose media
+/// folder sits somewhere else still finds its files.
+/// </summary>
+public sealed class MediaRepository(ProjectionDbContext db, string mediaRoot) : IMediaRepository
 {
     public async Task<IReadOnlyList<MediaItem>> ListAsync(CancellationToken ct) =>
         await db.Media.AsNoTracking().OrderBy(m => m.Filename).ToListAsync(ct);
@@ -28,5 +34,5 @@ public sealed class MediaRepository(ProjectionDbContext db) : IMediaRepository
     }
 
     public async Task<bool> IsAvailableAsync(MediaId id, CancellationToken ct) =>
-        await FindAsync(id, ct) is { } item && File.Exists(item.Path);
+        await FindAsync(id, ct) is { } item && MediaPaths.Exists(mediaRoot, item.Filename);
 }

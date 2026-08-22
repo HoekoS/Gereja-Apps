@@ -1,8 +1,8 @@
 using ChurchProjection.Api.Access;
-using ChurchProjection.Api.Media;
 using ChurchProjection.Api.Options;
 using ChurchProjection.Application.Ports;
 using ChurchProjection.Domain.Library;
+using ChurchProjection.Infrastructure.Storage;
 
 using Microsoft.Extensions.Options;
 
@@ -35,7 +35,11 @@ public static class MediaEndpoints
         });
 
         group.MapGet("/{id}/stream", async (
-            string id, IMediaRepository media, IOptions<StorageOptions> storage, CancellationToken ct) =>
+            HttpResponse response,
+            string id,
+            IMediaRepository media,
+            IOptions<StorageOptions> storage,
+            CancellationToken ct) =>
         {
             var item = await media.FindAsync(new MediaId(id), ct);
 
@@ -51,9 +55,17 @@ public static class MediaEndpoints
                 return ApiError.NotFound("MEDIA_FILE_MISSING", $"'{item.Filename}' is not in the media folder.");
             }
 
+            // Served as what the extension says, plus nosniff, so a row that
+            // predates the upload whitelist cannot get HTML executed on this
+            // origin — the origin that holds the pair cookie.
+            response.Headers.XContentTypeOptions = "nosniff";
+
             // enableRangeProcessing is what makes the projector's video element
             // able to seek instead of buffering the whole file first.
-            return Results.File(path, item.Kind, enableRangeProcessing: true);
+            return Results.File(
+                path,
+                MediaPaths.ContentTypeFor(item.Filename) ?? "application/octet-stream",
+                enableRangeProcessing: true);
         });
 
         group.MapPost("/", async (
@@ -88,6 +100,15 @@ public static class MediaEndpoints
                 return ApiError.BadRequest("BAD_FILENAME", "That filename cannot be stored.");
             }
 
+            // Derived from the extension, never from the client's Content-Type
+            // header: the header is attacker-chosen and an accepted text/html
+            // upload is stored XSS on the origin that holds the pair cookie.
+            if (MediaPaths.ContentTypeFor(name) is not { } kind)
+            {
+                return ApiError.BadRequest(
+                    "UNSUPPORTED_FILE_TYPE", $"'{name}' is not an image, video or audio file this app can project.");
+            }
+
             try
             {
                 await using (var target = File.Create(destination))
@@ -107,9 +128,8 @@ public static class MediaEndpoints
             var item = new MediaItem
             {
                 Id = $"med_{Guid.NewGuid():n}"[..12],
-                Kind = file.ContentType,
+                Kind = kind,
                 Filename = name,
-                Path = destination,
             };
 
             await media.AddAsync(item, ct);
@@ -130,7 +150,8 @@ public static class MediaEndpoints
 
         // Checked on every read rather than stored, because the failure this
         // guards against is someone tidying the media folder between Saturday
-        // and Sunday (FR-LIB-23).
-        available = MediaPaths.Resolve(mediaRoot, item.Filename) is { } path && File.Exists(path),
+        // and Sunday (FR-LIB-23). Same call the repository makes, against the
+        // same root, so the two cannot disagree.
+        available = MediaPaths.Exists(mediaRoot, item.Filename),
     };
 }

@@ -67,16 +67,14 @@ public static class DevSeed
         mediaRoot = Path.Combine(mediaRoot, "media");
         Directory.CreateDirectory(mediaRoot);
 
-        var presentPath = Path.Combine(mediaRoot, "seed-clip.bin");
-        await File.WriteAllBytesAsync(presentPath, new byte[64 * 1024], ct);
+        await File.WriteAllBytesAsync(Path.Combine(mediaRoot, "seed-clip.mp4"), new byte[64 * 1024], ct);
 
         db.Media.AddRange(
             new MediaItem
             {
                 Id = "med_present",
                 Kind = "video/mp4",
-                Filename = "seed-clip.bin",
-                Path = presentPath,
+                Filename = "seed-clip.mp4",
                 DurationMs = 12_000,
                 Width = 1920,
                 Height = 1080,
@@ -86,7 +84,6 @@ public static class DevSeed
                 Id = "med_missing",
                 Kind = "image/jpeg",
                 Filename = "moved-by-someone.jpg",
-                Path = Path.Combine(mediaRoot, "moved-by-someone.jpg"),
             });
 
         await db.SaveChangesAsync(ct);

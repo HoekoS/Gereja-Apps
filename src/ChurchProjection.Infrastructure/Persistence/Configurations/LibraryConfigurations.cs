@@ -91,7 +91,6 @@ public sealed class MediaConfiguration : IEntityTypeConfiguration<MediaItem>
         builder.Property(m => m.Id).HasColumnName("id").HasConversion(id => id.Value, value => new MediaId(value));
         builder.Property(m => m.Kind).HasColumnName("kind").IsRequired();
         builder.Property(m => m.Filename).HasColumnName("filename").IsRequired();
-        builder.Property(m => m.Path).HasColumnName("path").IsRequired();
         builder.Property(m => m.DurationMs).HasColumnName("duration_ms");
         builder.Property(m => m.Width).HasColumnName("width");
         builder.Property(m => m.Height).HasColumnName("height");

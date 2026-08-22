@@ -65,7 +65,11 @@ public static class CompositionRoot
 
         builder.Services.AddScoped<ITranslationRepository, TranslationRepository>();
         builder.Services.AddScoped<ISongRepository, SongRepository>();
-        builder.Services.AddScoped<IMediaRepository, MediaRepository>();
+        // Per scope, for the same reason the DbContext is: the media root is not
+        // known until the final configuration is in place.
+        builder.Services.AddScoped<IMediaRepository>(provider => new MediaRepository(
+            provider.GetRequiredService<ProjectionDbContext>(),
+            provider.GetRequiredService<IOptions<StorageOptions>>().Value.MediaRoot));
         builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
         builder.Services.AddScoped<ILiveStateRepository, LiveStateRepository>();
         builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
