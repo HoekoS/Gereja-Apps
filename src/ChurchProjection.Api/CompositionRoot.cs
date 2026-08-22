@@ -22,11 +22,17 @@ public static class CompositionRoot
     {
         var configuration = builder.Configuration;
 
-        builder.Services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.Section));
+        builder.Services.AddOptions<StorageOptions>()
+            .Bind(configuration.GetSection(StorageOptions.Section))
+            .PostConfigure<IHostEnvironment>((options, environment) =>
+                options.MakeAbsolute(environment.ContentRootPath));
+
         builder.Services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.Section));
         builder.Services.Configure<AccessOptions>(configuration.GetSection(AccessOptions.Section));
 
         var storage = configuration.GetSection(StorageOptions.Section).Get<StorageOptions>() ?? new StorageOptions();
+
+        storage.MakeAbsolute(builder.Environment.ContentRootPath);
         var cache = configuration.GetSection(CacheOptions.Section).Get<CacheOptions>() ?? new CacheOptions();
         var access = configuration.GetSection(AccessOptions.Section).Get<AccessOptions>() ?? new AccessOptions();
 
