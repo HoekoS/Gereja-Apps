@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 )
 
 // Error is a user-facing failure. Code is the SNAKE_CASE value the API
@@ -14,9 +15,10 @@ import (
 // response; Message is a sentence safe to show. Internal detail is logged,
 // never returned.
 type Error struct {
-	Status  int
-	Code    string
-	Message string
+	Status     int
+	Code       string
+	Message    string
+	RetryAfter int // seconds; 0 means "no Retry-After header"
 }
 
 func (e *Error) Error() string { return e.Message }
@@ -26,6 +28,15 @@ func NewError(status int, code, message string) *Error {
 }
 
 func NotFound(code, message string) *Error { return NewError(http.StatusNotFound, code, message) }
+
+// Throttled reports a rate-limit rejection (NFR-SEC-05); seconds is quoted
+// back in Retry-After so a client backs off by the right amount rather than
+// hammering the window boundary.
+func Throttled(seconds int) *Error {
+	e := NewError(http.StatusTooManyRequests, "THROTTLED", "Too many attempts. Try again shortly.")
+	e.RetryAfter = seconds
+	return e
+}
 
 // Unavailable reports a dependency outage (storage, cache) in the documented
 // envelope without leaking the underlying error to the client.
@@ -51,6 +62,9 @@ func WriteError(w http.ResponseWriter, err error) {
 	if !ok {
 		slog.Error("Request failed", "error", err)
 		apiErr = Unavailable("Storage unavailable")
+	}
+	if apiErr.RetryAfter > 0 {
+		w.Header().Set("Retry-After", strconv.Itoa(apiErr.RetryAfter))
 	}
 	_ = WriteJSON(w, apiErr.Status, map[string]any{
 		"error": map[string]string{"code": apiErr.Code, "message": apiErr.Message},

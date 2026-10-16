@@ -12,7 +12,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"gereja-apps/api/internal/access"
 	"gereja-apps/api/internal/bible"
+	"gereja-apps/api/internal/platform"
 )
 
 func main() {
@@ -37,18 +39,29 @@ func run() error {
 	}
 	defer pool.Close()
 
-	mux := http.NewServeMux()
-	bible.NewHandler(bible.NewStore(pool)).Routes(mux)
-	// A new context mounts here, same shape as Identity's in the Matsu
-	// template: its own NewHandler(...).Routes(mux) line.
+	cookieSecret := os.Getenv("PAIR_COOKIE_SECRET")
+	if cookieSecret == "" {
+		return errors.New("PAIR_COOKIE_SECRET is missing")
+	}
 
-	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) })
-	mux.HandleFunc("GET /health/ready", func(w http.ResponseWriter, r *http.Request) {
-		if err := pool.Ping(r.Context()); err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
+	accessSettings := access.DefaultSettings()
+	// Test-only switches (AGENTS.md / AccessOptions parity): refuse both
+	// outside a test environment before this ever leaves a trusted LAN.
+	accessSettings.TestPin = os.Getenv("ACCESS_TEST_PIN")
+	accessSettings.RequirePairingFromLoopback = os.Getenv("ACCESS_REQUIRE_PAIRING_FROM_LOOPBACK") == "true"
+
+	accessHandler := access.NewHandler(access.NewStore(pool), []byte(cookieSecret), accessSettings)
+	bibleHandler := bible.NewHandler(bible.NewStore(pool))
+
+	mux := http.NewServeMux()
+	accessHandler.Routes(mux)
+	bibleHandler.Routes(mux, accessHandler.RequirePair)
+	// A new context mounts here, same shape: its own NewHandler(...),
+	// then .Routes(mux, accessHandler.RequirePair) for whichever of its
+	// routes the contract requires paired.
+
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+		_ = platform.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "version": version()})
 	})
 
 	address := os.Getenv("LISTEN_ADDR")
@@ -69,4 +82,11 @@ func run() error {
 		return err
 	}
 	return nil
+}
+
+func version() string {
+	if v := os.Getenv("APP_VERSION"); v != "" {
+		return v
+	}
+	return "0.0.0"
 }
