@@ -1,0 +1,23 @@
+name: Docs scope
+
+on:
+  pull_request:
+  push:
+    branches: [feat/projection-backend]
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-scope:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: No Markdown under api/ or app/
+        run: |
+          markdown=$(git ls-files '*.md' | grep -E '^(api|app)/' || true)
+          if [ -n "$markdown" ]; then
+            echo "Markdown is not allowed under api/ or app/ (see AGENTS.md):"
+            echo "$markdown"
+            exit 1
+          fi
