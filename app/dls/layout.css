@@ -1,0 +1,435 @@
+/* Page frame: a header band, then one centred column. Both share the same left edge. */
+html[data-theme] body .dls-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 20px
+    max(var(--dls-page-pad), calc((100% - var(--dls-page-max)) / 2 + var(--dls-page-pad)));
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme] body .dls-page-header h1 {
+  margin: 0;
+  font-size: var(--dls-text-xl);
+}
+html[data-theme] body .dls-page-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--dls-text-sm);
+}
+html[data-theme] body .dls-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--dls-page-max);
+  margin: 0 auto;
+  padding: var(--dls-page-pad);
+}
+html[data-theme] body .dls-page.dls-game-workspace {
+  max-width: none;
+  padding: 8px;
+}
+
+/* Tool sidebar: always on the right of its content, collapsible to a rail. */
+html[data-theme] body .dls-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto;
+  gap: var(--dls-page-gap);
+  align-items: start;
+}
+html[data-theme] body .dls-split > * {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+html[data-theme] body .dls-split > [data-dls-sidebar] {
+  grid-column: 2;
+  box-sizing: border-box;
+  width: var(--dls-sidebar-width);
+  min-width: 0;
+  max-width: none;
+  position: sticky;
+  top: var(--dls-page-pad);
+  max-height: calc(100dvh - 2 * var(--dls-page-pad));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+html[data-theme] body .dls-split.dls-workspace {
+  gap: 0;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar] {
+  position: static;
+  max-height: none;
+  height: 100%;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+}
+.dls-sidebar-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 16px;
+}
+.dls-sidebar-head > :is(h1, h2) {
+  margin: 0;
+  min-width: 0;
+}
+.dls-sidebar-head > :not(.dls-sidebar-toggle):first-of-type {
+  flex: 1;
+}
+.dls-sidebar-expand {
+  display: none !important;
+}
+html[data-theme] body [data-dls-sidebar][data-collapsed]:not(#dls) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--dls-rail);
+  min-width: var(--dls-rail);
+  padding: 8px 0;
+  overflow: hidden;
+}
+[data-dls-sidebar][data-collapsed] > :not(.dls-sidebar-expand) {
+  display: none !important;
+}
+[data-dls-sidebar][data-collapsed] > .dls-sidebar-expand {
+  display: grid !important;
+}
+
+/* One toggle for every sidebar: panel icon, 44px target, the chevron says which way it moves. */
+html[data-theme] body button.dls-sidebar-toggle:not(#dls) {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--dls-control-radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+html[data-theme] body button.dls-sidebar-toggle:not(#dls):hover {
+  background: var(--dls-raised);
+  color: var(--text);
+}
+.dls-sidebar-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dls-sidebar-toggle .chevron {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dls-sidebar-toggle[aria-expanded="false"] .chevron {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 48rem) {
+  html[data-theme] body .dls-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-theme] body .dls-split > * {
+    grid-row: auto;
+  }
+  html[data-theme] body .dls-split > [data-dls-sidebar] {
+    grid-column: 1;
+    width: auto;
+    position: static;
+    max-height: none;
+  }
+  html[data-theme] body .dls-split.dls-workspace {
+    grid-template-rows: auto minmax(55vh, 1fr);
+    overflow-y: auto;
+  }
+  html[data-theme] body .dls-workspace > [data-dls-sidebar] {
+    height: auto;
+    max-height: 45vh;
+    border-left: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  html[data-theme] body [data-dls-sidebar][data-collapsed]:not(#dls) {
+    width: auto;
+    align-items: flex-start;
+    padding: 8px;
+  }
+}
+
+/* Workspace sidebars are one flat surface: sections are divided by rules, and
+   disclosures are plain rows, never a card inside a card. */
+html[data-theme] body .dls-workspace > [data-dls-sidebar]:not(#dls) {
+  background: var(--surface);
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar] .panel:not(#dls) {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 16px 0;
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar] .panel details:not(#dls) {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0 0 8px;
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar] .panel details + details:not(#dls) {
+  border-top: 1px solid var(--border);
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar] .panel details details:not(#dls) {
+  padding: 0;
+  border: 0;
+}
+html[data-theme]
+  body
+  .dls-workspace
+  > [data-dls-sidebar]
+  :is(.panel details, details.panel)
+  > summary:not(#dls) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 0;
+  font-size: var(--dls-text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+html[data-theme]
+  body
+  .dls-workspace
+  > [data-dls-sidebar]
+  :is(.panel details, details.panel)
+  > summary:not(#dls) {
+  list-style: none;
+  cursor: pointer;
+}
+.dls-workspace
+  > [data-dls-sidebar]
+  :is(.panel details, details.panel)
+  > summary::-webkit-details-marker {
+  display: none;
+}
+.dls-workspace > [data-dls-sidebar] :is(.panel details, details.panel) > summary::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin: 0 6px 0 2px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform var(--dls-duration) var(--dls-ease);
+}
+.dls-workspace > [data-dls-sidebar] :is(.panel details, details.panel)[open] > summary::before {
+  transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dls-workspace > [data-dls-sidebar] :is(.panel details, details.panel) > summary::before {
+    transition: none;
+  }
+}
+html[data-theme] body input[type="file"] {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Collapsed sidebar: only the expand button remains. On a canvas workspace it
+   floats over the canvas corner so the canvas gets the full width; on a page it
+   sits alone in the gutter. */
+html[data-theme] body .dls-workspace {
+  position: relative;
+}
+html[data-theme] body .dls-workspace:has(> [data-dls-sidebar][data-collapsed]) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+html[data-theme] body .dls-split > [data-dls-sidebar][data-collapsed]:not(#dls) {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+html[data-theme] body .dls-workspace > [data-dls-sidebar][data-collapsed]:not(#dls) {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+}
+html[data-theme]
+  body
+  .dls-split
+  > [data-dls-sidebar][data-collapsed]
+  > button.dls-sidebar-expand:not(#dls) {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--dls-shadow);
+  color: var(--text);
+}
+html[data-theme]
+  body
+  .dls-split
+  > [data-dls-sidebar][data-collapsed]
+  > button.dls-sidebar-expand:not(#dls):hover {
+  background: var(--dls-raised);
+}
+
+/* React sidebar controls float beside the panel and preserve its mounted content. */
+html[data-theme] body .dls-split {
+  position: relative;
+}
+html[data-theme] body .dls-split > .dls-tool-sidebar:not(#dls) {
+  padding: 0;
+  overflow: visible;
+  background: var(--surface);
+  border-radius: var(--dls-radius);
+  box-shadow: var(--dls-shadow);
+}
+.dls-sidebar-content {
+  padding: 24px;
+  max-height: inherit;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+html[data-theme] body .dls-workspace > .dls-tool-sidebar:not(#dls) {
+  border-radius: 0;
+  box-shadow: none;
+}
+.dls-workspace > .dls-tool-sidebar > .dls-sidebar-content {
+  height: 100%;
+  max-height: 100%;
+}
+html[data-theme] body .dls-tool-sidebar > button.dls-tool-sidebar-toggle:not(#dls) {
+  display: grid !important;
+  position: absolute;
+  left: -22px;
+  top: 12px;
+  z-index: 6;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--dls-shadow);
+  color: var(--text);
+}
+html[data-theme] body .dls-tool-sidebar > button.dls-tool-sidebar-toggle:not(#dls):hover {
+  background: var(--dls-raised);
+}
+html[data-theme] body .dls-split:has(> .dls-tool-sidebar[data-collapsed]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+html[data-theme] body .dls-split > .dls-tool-sidebar[data-collapsed]:not(#dls) {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  width: 0;
+  min-width: 0;
+  height: 0;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  z-index: 6;
+}
+html[data-theme] body .dls-tool-sidebar[data-collapsed] > button.dls-tool-sidebar-toggle:not(#dls) {
+  left: auto;
+  right: 0;
+}
+@media (max-width: 48rem) {
+  html[data-theme] body .dls-tool-sidebar > button.dls-tool-sidebar-toggle:not(#dls) {
+    left: auto;
+    right: 8px;
+    top: 8px;
+  }
+  html[data-theme] body .dls-tool-sidebar .dls-sidebar-content {
+    padding-top: 60px;
+  }
+}
+
+html[data-theme]
+  body
+  .dls-tool-sidebar[data-toggle-side="right"]
+  > button.dls-tool-sidebar-toggle:not(#dls) {
+  left: auto;
+  right: 12px;
+}
+html[data-theme]
+  body
+  .dls-tool-sidebar[data-toggle-side="right"][data-collapsed]
+  > button.dls-tool-sidebar-toggle:not(#dls) {
+  right: 0;
+}
+
+/* Keep workspace rows within the viewport so long controls can scroll. */
+html[data-theme] body .dls-split.dls-workspace {
+  grid-template-rows: minmax(0, 1fr);
+}
+html[data-theme] body .dls-workspace > .dls-tool-sidebar {
+  min-height: 0;
+}
+.dls-scroll-region,
+.dls-sidebar-content {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) var(--surface);
+}
+html[data-theme] body .viewer-controls > * {
+  flex-shrink: 0;
+}
+html[data-theme] body .dls-panel.dls-editor-panel {
+  height: clamp(32rem, 70dvh, 52rem);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 16px;
+}
+.dls-editor-panel > .dls-scroll-region {
+  flex: 1;
+}
+.dls-editor-panel > .integration-routes {
+  flex: none;
+}
+@media (max-width: 48rem) {
+  html[data-theme] body .dls-split.dls-workspace {
+    grid-template-rows: auto minmax(55vh, 1fr);
+  }
+}

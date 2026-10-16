@@ -1,0 +1,309 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --dls-team-a: #bd5217;
+    --dls-team-b: #1e6cbb;
+    color-scheme: light;
+    --dls-modal-scrim: rgb(0 0 0 / 0.5);
+    --rover-background: 0 0% 97%;
+    --rover-foreground: 222 47% 11%;
+    --rover-card: 0 0% 100%;
+    --rover-card-foreground: 222 47% 11%;
+    --rover-popover: 0 0% 100%;
+    --rover-popover-foreground: 222 47% 11%;
+    --rover-primary: 222 47% 11%;
+    --rover-primary-foreground: 210 40% 98%;
+    --rover-secondary: 210 40% 96%;
+    --rover-secondary-foreground: 222 47% 11%;
+    --rover-muted: 210 40% 96%;
+    --rover-muted-foreground: 215 16% 47%;
+    --rover-accent: 210 40% 96%;
+    --rover-accent-foreground: 222 47% 11%;
+    --rover-destructive: 0 84% 60%;
+    --rover-destructive-foreground: 210 40% 98%;
+    --rover-border: 214 32% 91%;
+    --rover-input: 214 32% 91%;
+    --rover-ring: 222 47% 11%;
+    --rover-radius: 1rem;
+  }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply m-0 bg-background font-sans text-base text-foreground antialiased;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  [hidden] {
+    display: none !important;
+  }
+}
+@layer components {
+  .rover-shell {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .rover-shell-collapsed {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+  .rover-navigation {
+    @apply flex min-h-0 flex-col gap-6 border-r border-border/50 bg-card p-3;
+  }
+  .rover-route-list {
+    @apply grid min-h-0 content-start gap-6;
+    flex: 1;
+    overflow: auto;
+    scrollbar-width: none;
+  }
+  .rover-route-list::-webkit-scrollbar {
+    display: none;
+  }
+  .rover-mobile-menu {
+    display: none;
+  }
+  .rover-content {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .rover-content iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  @media (max-width: 48rem) {
+    .rover-shell {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+    .rover-navigation {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      border-right: 0;
+      border-bottom: 1px solid hsl(var(--rover-border));
+    }
+    .rover-route-list {
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 50dvh;
+    }
+    .rover-route-list h2 {
+      display: none;
+    }
+    .rover-desktop-toggle {
+      display: none;
+    }
+    .rover-mobile-menu {
+      display: inline-flex;
+    }
+    .rover-shell:not([data-mobile-menu-open="true"]) .rover-route-list {
+      display: none;
+    }
+    .rover-shell-collapsed .rover-route-list a {
+      justify-content: flex-start;
+    }
+    .rover-route-list a {
+      padding-inline: 8px;
+      overflow-wrap: anywhere;
+    }
+    .rover-shell-collapsed .rover-route-list .sr-only {
+      position: static;
+      width: auto;
+      height: auto;
+      clip: auto;
+      white-space: normal;
+    }
+  }
+}
+@media (forced-colors: active) {
+  button,
+  input,
+  [role="tab"],
+  [role="dialog"] {
+    border: 1px solid ButtonText;
+    box-shadow: none;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+.dls-switch {
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+}
+.dls-switch::after {
+  content: "";
+  position: absolute;
+  inset: 8px 0;
+  border: 1px solid hsl(var(--rover-muted-foreground));
+  border-radius: 9999px;
+  background: hsl(var(--rover-secondary));
+}
+.dls-switch::before {
+  content: "";
+  position: absolute;
+  inset: 12px auto auto 4px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(var(--rover-muted-foreground));
+}
+.dls-switch:checked::after {
+  background: hsl(var(--rover-primary));
+  border-color: hsl(var(--rover-primary));
+}
+.dls-switch:checked::before {
+  transform: translateX(16px);
+  background: hsl(var(--rover-primary-foreground));
+}
+.dls-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.dls-switch:focus-visible {
+  outline: 3px solid hsl(var(--rover-ring));
+  outline-offset: 3px;
+}
+.dls-number-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+.dls-number-field > button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.dls-number-field > input {
+  text-align: center;
+  min-width: 0;
+  width: 100%;
+  appearance: textfield;
+}
+.dls-number-field input::-webkit-inner-spin-button {
+  appearance: none;
+}
+.dls-number-field:has(input:disabled) > button {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.dls-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+}
+.dls-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.dls-disclosure-chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transform: rotate(0deg);
+}
+.dls-disclosure[open] .dls-disclosure-chevron {
+  transform: rotate(90deg);
+}
+.dls-disclosure-body {
+  display: grid;
+  gap: 12px;
+  padding-block: 12px;
+}
+.dls-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 24px;
+  background: hsl(var(--rover-secondary));
+}
+.dls-segmented label {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.dls-segmented input {
+  position: absolute;
+  opacity: 0;
+}
+.dls-segmented span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 9999px;
+}
+.dls-segmented input:checked + span {
+  background: hsl(var(--rover-card));
+  box-shadow: var(--dls-shadow);
+  font-weight: 600;
+}
+.dls-segmented input:focus-visible + span {
+  outline: 3px solid hsl(var(--rover-ring));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dls-switch::before {
+    transition: transform 180ms ease;
+  }
+  .dls-disclosure-chevron {
+    transition: transform 180ms ease;
+  }
+}
+@media (forced-colors: active) {
+  .dls-switch {
+    appearance: auto;
+  }
+  .dls-switch::before,
+  .dls-switch::after {
+    display: none;
+  }
+  .dls-segmented input:checked + span {
+    outline: 2px solid Highlight;
+  }
+}
+
+html[data-theme] body .dls-number-field > [data-dls-button] {
+  padding: 8px;
+  min-width: 44px;
+  width: 44px;
+}
+
+/* Entity selection keeps card geometry; pill radius is only for action controls. */
+html[data-theme] body .dls-entity-card {
+  border-radius: 1.25rem;
+  background: hsl(var(--rover-card));
+  color: hsl(var(--rover-card-foreground));
+  padding: 20px;
+}

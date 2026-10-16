@@ -1,0 +1,90 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": ".."
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/public",
+      "!**/*.html",
+      "!package-lock.json",
+      "!**/*.svg",
+      "!media"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noAssignInExpressions": "warn",
+        "useIterableCallbackReturn": "warn",
+        "noArrayIndexKey": "warn",
+        "noControlCharactersInRegex": "warn",
+        "noShadowRestrictedNames": "warn",
+        "noImplicitAnyLet": "warn",
+        "noEmptyBlock": "warn",
+        "noUnknownAtRules": {
+          "level": "error",
+          "options": {
+            "ignore": ["tailwind", "apply", "layer", "config"]
+          }
+        }
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noUnusedFunctionParameters": "warn",
+        "useHookAtTopLevel": "warn",
+        "noUnusedVariables": "warn",
+        "noInnerDeclarations": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
+      },
+      "style": {
+        "noDescendingSpecificity": "off",
+        "noNonNullAssertion": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off"
+      },
+      "a11y": {
+        "noLabelWithoutControl": "warn",
+        "useButtonType": "warn",
+        "useValidAnchor": "warn",
+        "noSvgWithoutTitle": "warn",
+        "useSemanticElements": "warn",
+        "useKeyWithClickEvents": "warn",
+        "noNoninteractiveTabindex": "warn",
+        "useAriaPropsForRole": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "noAriaHiddenOnFocusable": "warn"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}

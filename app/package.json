@@ -1,0 +1,50 @@
+{
+  "version": "0.1.0",
+  "dependencies": {
+    "@radix-ui/react-dialog": "1.1.23",
+    "@radix-ui/react-popover": "1.1.23",
+    "@radix-ui/react-slot": "1.3.3",
+    "@radix-ui/react-tabs": "1.1.21",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.49.0",
+    "motion": "14.0.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-dropzone": "20.1.2",
+    "tailwind-merge": "2.6.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "esbuild": "0.28.2",
+    "jsdom": "30.1.1",
+    "tailwindcss": "3.4.19",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "vitest": "5.0.3"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node scripts/start-preview.mjs",
+    "test": "node --test && npm run test:react",
+    "typecheck:react": "tsc -p dls/react/tsconfig.json",
+    "test:react": "vitest run --config dls/react/vitest.config.mts",
+    "build": "vite build --config vite.config.mjs",
+    "dev": "vite --config vite.config.mjs",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "prepare": "git -C .. config core.hooksPath .githooks || exit 0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "name": "gereja-apps-app"
+}

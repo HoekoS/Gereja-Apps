@@ -1,0 +1,293 @@
+/* Shared adaptation: compact <=48rem, narrow <=30rem; wide uses Tailwind xl=80rem.
+   Panels adapt to their own content width instead of guessing a device. */
+html[data-theme] body :is(.dls-panel, .dls-card) {
+  container-type: inline-size;
+  container-name: rover-panel;
+}
+html[data-theme] body :is(.dls-page, .rover-content, .dls-task-primary, .dls-task-secondary) {
+  min-width: 0;
+}
+html[data-theme] body :is(.settings, .fields, .route-fields, .transfer-sides, .pair, .triple) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  min-width: 0;
+}
+html[data-theme] body .section-head {
+  flex-wrap: wrap;
+}
+html[data-theme] body .dls-table-scroll {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+html[data-theme] body .dls-appearance-dialog {
+  width: calc(100% - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  max-height: calc(
+    100dvh -
+    2rem -
+    env(safe-area-inset-top, 0px) -
+    env(safe-area-inset-bottom, 0px)
+  );
+}
+html[data-theme] body .dls-color-picker-panel {
+  max-width: calc(100vw - 3rem);
+  max-height: var(--radix-popover-content-available-height);
+  overflow: auto;
+}
+.rover-navigation {
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+  padding-inline-start: max(12px, env(safe-area-inset-left, 0px));
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+@container rover-panel (max-width: 32rem) {
+  html[data-theme] body :is(.settings, .fields, .route-fields, .transfer-sides, .task-picker) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-theme] body .wide {
+    grid-column: auto;
+  }
+}
+@media (max-width: 48rem) {
+  html[data-theme] body #simulators {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-theme] body.tool-map .pair,
+  html[data-theme] body.tool-map .triple {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  }
+  html[data-theme] body[data-tool="integration"] {
+    padding-bottom: calc(10rem + env(safe-area-inset-bottom, 0px));
+  }
+  html[data-theme] body .dls-action-bar.run-actions {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    max-height: 45dvh;
+    overflow: auto;
+  }
+  html[data-theme] body .dls-workspace > [data-dls-sidebar] {
+    max-height: 45dvh;
+  }
+}
+@media (max-width: 30rem) {
+  .dls-appearance-row {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dls-appearance-value {
+    max-width: 100%;
+    flex: 0 1 auto;
+    justify-content: flex-end;
+  }
+  .dls-appearance-value:has(.dls-mode-picker) {
+    width: 100%;
+  }
+  .dls-mode-picker {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+  .dls-mode-preview {
+    width: 100%;
+    min-width: 0;
+  }
+  .rover-route-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] body :is([data-dls-button], .dls-entity-card, .dls-workflow-step) {
+    transition: none;
+  }
+  html[data-theme] body {
+    scroll-behavior: auto;
+  }
+}
+
+html[data-theme] body[data-tool="race"] .lane-name {
+  font-size: var(--dls-text-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+  line-height: var(--dls-leading-tight);
+}
+body[data-tool="race"] {
+  --lane-height: clamp(3.5rem, calc((100dvh - 20rem) / 10), 5rem);
+}
+@media (max-width: 48rem) {
+  .rover-navigation > div:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .rover-navigation > div:first-child > a {
+    display: none;
+  }
+  .rover-navigation > div:last-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .rover-route-list {
+    grid-row: 2;
+  }
+}
+
+html[data-theme] body[data-tool="race"] .race-top {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Unlayered visibility rules must beat Button's inline-flex utility. */
+.rover-navigation .rover-mobile-menu {
+  display: none;
+}
+@media (max-width: 48rem) {
+  .rover-navigation .rover-desktop-toggle {
+    display: none;
+  }
+  .rover-navigation .rover-mobile-menu {
+    display: inline-flex;
+  }
+}
+.dls-form-stack {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.dls-chip-input {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.dls-chip-input > label {
+  font-size: var(--dls-text-sm);
+  font-weight: 600;
+}
+.dls-chip-input > ul:empty {
+  display: none;
+}
+
+.dls-creatable-entries {
+  display: grid;
+  gap: 8px;
+  max-height: 20rem;
+  overflow: auto;
+}
+.dls-creatable-entries:empty {
+  display: none;
+}
+html[data-theme] body[data-tool="race"] .lanes {
+  overflow-x: hidden;
+  max-height: var(--lane-budget);
+}
+html[data-theme] body[data-tool="race"] .lane {
+  grid-template-columns: clamp(7.5rem, 14%, 9.5rem) minmax(0, 1fr);
+}
+
+html[data-theme] body .viewer-controls {
+  background: var(--surface);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+html[data-theme] body .viewer-controls .dls-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  gap: 16px;
+}
+html[data-theme] body .viewer-controls [role="tabpanel"][hidden] {
+  display: none;
+}
+html[data-theme] body .viewer-controls [role="tabpanel"] > :is(.dls-form-stack, .dls-panel) {
+  margin-bottom: 20px;
+}
+html[data-theme] body .viewer-controls #edgeDirectionPanel,
+html[data-theme] body .viewer-controls #legendPanel {
+  margin-bottom: 24px;
+}
+
+html[data-theme] body .viewer-controls [role="tablist"] {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  width: 100%;
+  border-radius: 12px;
+}
+html[data-theme] body .viewer-controls [role="tab"] {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+html[data-theme] body[data-tool="integration"] .map-picking-field {
+  outline: none;
+  background: transparent;
+}
+html[data-theme] body[data-tool="integration"] .route-fields > label {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+html[data-theme] body[data-tool="integration"] .option-chips {
+  align-items: center;
+}
+html[data-theme] body[data-tool="integration"] .option-chips > button {
+  height: 44px;
+  align-self: center;
+}
+
+.rover-server-picker {
+  gap: 8px;
+  padding: 0 8px;
+}
+@media (max-width: 48rem) {
+  .rover-server-picker {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .rover-route-list {
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 64rem) {
+  html[data-theme] body .integration-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .integration-map {
+    position: static;
+  }
+  .integration-run {
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 48rem) {
+  html[data-theme] body[data-tool="race"] .finish-watch {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+@media (min-width: 70rem) {
+  html[data-theme] body[data-tool="race"] .lanes.large-field {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: var(--lane-budget);
+  }
+  html[data-theme] body[data-tool="race"] .lanes.large-field .lane {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+}

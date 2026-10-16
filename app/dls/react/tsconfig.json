@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "types": ["@testing-library/jest-dom/vitest", "node", "vite/client"],
+    "resolveJsonModule": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../../tools/*/react/**/*.ts", "../../tools/*/react/**/*.tsx"]
+}

@@ -1,0 +1,81 @@
+/* Local fonts belong to foundations; font-face names must be literal families. */
+@font-face {
+  font-family: Roboto;
+  src: url("../assets/roboto-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: Montserrat;
+  src: url("../assets/montserrat-latin.woff2") format("woff2");
+  font-weight: 500 700;
+  font-display: swap;
+}
+:root {
+  --dls-space-1: 0.25rem;
+  --dls-space-2: 0.5rem;
+  --dls-space-3: 0.75rem;
+  --dls-space-4: 1rem;
+  --dls-space-6: 1.5rem;
+  --dls-space-8: 2rem;
+  --dls-control-weight: 500;
+  --dls-control-padding: 0.625rem 0.75rem;
+  --dls-disabled-opacity: 0.5;
+  --dls-focus-width: 3px;
+  --dls-focus-offset: 3px;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+[hidden] {
+  display: none !important;
+}
+/* ── Foundations ─────────────────────────────────────────────────────────────
+   Type, page frame and tool sidebars. Tools use these tokens and classes; they
+   never hard-code a font size, font family, colour, page width or sidebar width.
+   Rules: ../AGENTS.md. Enforced by foundations.test.mjs. */
+:root {
+  --dls-font-body: Roboto, Arial, sans-serif;
+  --dls-font-display: Montserrat, Roboto, Arial, sans-serif;
+  --dls-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dls-text-xs: 0.75rem;
+  --dls-text-sm: 0.875rem;
+  --dls-text-md: 1rem;
+  --dls-text-lg: 1.125rem;
+  --dls-text-xl: 1.5rem;
+  --dls-leading: 1.5;
+  --dls-leading-tight: 1.25;
+  --dls-page-max: 1600px;
+  --dls-page-pad: clamp(16px, 3vw, 40px);
+  --dls-page-gap: clamp(16px, 2vw, 24px);
+  --dls-sidebar-width: clamp(300px, 28vw, 380px);
+  --dls-rail: 56px;
+  --dls-control-type: var(--dls-text-md);
+}
+/* Defaults carry zero specificity (:where) so a tool picks a role token, e.g. a small panel label h2 uses --dls-text-xs. */
+:where(html[data-theme]) body {
+  font-family: var(--dls-font-body);
+  font-size: var(--dls-text-md);
+  line-height: var(--dls-leading);
+}
+:where(html[data-theme] body) :where(h1, h2, h3) {
+  font-family: var(--dls-font-display);
+  line-height: var(--dls-leading-tight);
+}
+:where(html[data-theme] body) h1 {
+  font-size: var(--dls-text-xl);
+}
+:where(html[data-theme] body) h2 {
+  font-size: var(--dls-text-lg);
+}
+:where(html[data-theme] body) h3 {
+  font-size: var(--dls-text-md);
+}
+:where(html[data-theme] body) :where(code, kbd, pre, samp) {
+  font-family: var(--dls-font-mono);
+}

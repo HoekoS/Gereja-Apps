@@ -1,0 +1,507 @@
+/* Shared motion language. State and focus stay owned by React/Radix.
+   Spatial effects are opt-in; reduced motion has an immediate static fallback. */
+:root {
+  --dls-motion-fast: 120ms;
+  --dls-motion-enter: 200ms;
+  --dls-motion-exit: 140ms;
+  --dls-motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dls-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dls-motion-distance: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dls-dialog-overlay[data-state="open"] {
+    animation: dls-fade-in var(--dls-motion-enter) ease-out;
+  }
+  .dls-dialog-overlay[data-state="closed"] {
+    animation: dls-fade-out var(--dls-motion-exit) ease-in;
+  }
+  /* Individual scale preserves Tailwind's centering transform. */
+  .dls-dialog-content[data-state="open"] {
+    animation: dls-dialog-in var(--dls-motion-enter) var(--dls-motion-ease-out);
+  }
+  .dls-dialog-content[data-state="closed"] {
+    animation: dls-dialog-out var(--dls-motion-exit) var(--dls-motion-ease-in);
+  }
+  .dls-popover {
+    transform-origin: var(--radix-popover-content-transform-origin);
+  }
+  .dls-popover[data-side="bottom"] {
+    --dls-popover-offset: 0 calc(-1 * var(--dls-motion-distance));
+  }
+  .dls-popover[data-side="top"] {
+    --dls-popover-offset: 0 var(--dls-motion-distance);
+  }
+  .dls-popover[data-side="left"] {
+    --dls-popover-offset: var(--dls-motion-distance) 0;
+  }
+  .dls-popover[data-side="right"] {
+    --dls-popover-offset: calc(-1 * var(--dls-motion-distance)) 0;
+  }
+  .dls-popover[data-state="open"] {
+    animation: dls-popover-in var(--dls-motion-enter) var(--dls-motion-ease-out);
+  }
+  .dls-popover[data-state="closed"] {
+    animation: dls-popover-out var(--dls-motion-exit) var(--dls-motion-ease-in);
+  }
+  html[data-theme]
+    body
+    :is(
+      [data-dls-button],
+      .rover-route-list a,
+      .dls-choice-item,
+      .dls-dropzone,
+      select.dls-select
+    ) {
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--dls-motion-fast);
+    transition-timing-function: ease-out;
+  }
+  /* Entry only: frames remain mounted and switching never waits for an exit. */
+  .rover-content iframe:not([hidden]) {
+    animation: dls-fade-in var(--dls-motion-enter) ease-out;
+  }
+}
+
+@keyframes dls-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dls-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes dls-dialog-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes dls-dialog-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+@keyframes dls-popover-in {
+  from {
+    opacity: 0;
+    translate: var(--dls-popover-offset, 0 0);
+    scale: 0.98;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes dls-popover-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.dls-dialog-overlay, .dls-dialog-content, .dls-popover, .rover-content iframe) {
+    animation: none;
+  }
+  html[data-theme]
+    body
+    :is(
+      [data-dls-button],
+      .rover-route-list a,
+      .dls-choice-item,
+      .dls-dropzone,
+      select.dls-select
+    ) {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme] body [data-dls-button] {
+    transition:
+      background-color var(--dls-motion-fast) ease-out,
+      color var(--dls-motion-fast) ease-out,
+      border-color var(--dls-motion-fast) ease-out,
+      scale var(--dls-motion-fast) var(--dls-motion-ease-out);
+  }
+  html[data-theme] body [data-dls-button]:active:not(:disabled) {
+    scale: 0.96;
+  }
+  .rover-route-icon {
+    transition:
+      background-color var(--dls-motion-fast) ease-out,
+      color var(--dls-motion-fast) ease-out,
+      transform var(--dls-motion-enter) var(--dls-motion-ease-out);
+  }
+  .rover-route-list a:hover .rover-route-icon {
+    transform: translateX(2px);
+  }
+  .rover-route-list a[aria-current="page"] .rover-route-icon {
+    animation: dls-nav-select var(--dls-motion-enter) var(--dls-motion-ease-out);
+  }
+  .dls-disclosure > summary {
+    transition:
+      background-color var(--dls-motion-fast) ease-out,
+      color var(--dls-motion-fast) ease-out;
+  }
+  /* Progressive enhancement: native details remains functional elsewhere. */
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    .dls-disclosure {
+      interpolate-size: allow-keywords;
+    }
+    .dls-disclosure::details-content {
+      block-size: 0;
+      opacity: 0;
+      overflow: clip;
+      transition:
+        block-size var(--dls-motion-enter) var(--dls-motion-ease-out),
+        opacity var(--dls-motion-enter) ease-out,
+        content-visibility var(--dls-motion-enter) allow-discrete;
+    }
+    .dls-disclosure[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+}
+@keyframes dls-nav-select {
+  from {
+    transform: scale(0.85);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dls-pending-spinner {
+    animation: dls-working 1s linear infinite;
+  }
+  .dls-operation-progress > span {
+    transition: width var(--dls-motion-enter) ease-out;
+  }
+  .dls-operation-feedback[data-state="pending"] .dls-operation-progress > span[data-indeterminate] {
+    animation: dls-indeterminate 1.4s ease-in-out infinite alternate;
+  }
+}
+@keyframes dls-working {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dls-indeterminate {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(285%);
+  }
+}
+/* Explicit app preference supplements (and never overrides) the OS preference. */
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after,
+html[data-motion="reduce"] details::details-content {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduce"]) .rover-navigation {
+    view-transition-name: rover-navigation;
+  }
+  html:not([data-motion="reduce"]) .rover-content {
+    view-transition-name: rover-workspace;
+  }
+  html:not([data-motion="reduce"]) .dls-tool-sidebar {
+    view-transition-name: tool-panel;
+  }
+  ::view-transition-group(rover-navigation),
+  ::view-transition-group(rover-workspace),
+  ::view-transition-group(tool-panel) {
+    animation-duration: var(--dls-motion-enter);
+    animation-timing-function: var(--dls-motion-ease-out);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+html[data-motion="reduce"]::view-transition-group(*),
+html[data-motion="reduce"]::view-transition-old(*),
+html[data-motion="reduce"]::view-transition-new(*) {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dls-tabs-content[data-state="active"]:not([hidden]) {
+    animation: dls-fade-in var(--dls-motion-enter) ease-out;
+  }
+}
+/* Visual snapshots must not block the live controls during a reversal. */
+::view-transition,
+::view-transition-group(*),
+::view-transition-image-pair(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  pointer-events: none;
+}
+
+/* Launch surface: one original brand mascot, DLS palette/type, no interactive gate. */
+.rover-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: var(--page);
+  color: var(--text);
+  overflow: hidden;
+  transition:
+    opacity 240ms ease,
+    visibility 240ms;
+}
+.rover-splash[data-leaving="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.rover-splash-content {
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+  padding: 24px;
+  text-align: center;
+  max-width: 100%;
+}
+.rover-splash-stage {
+  position: relative;
+  width: min(280px, 70vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.rover-splash-orbit {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--blue) 10%, var(--page));
+  animation: rover-splash-orbit 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rover-splash-mascot {
+  position: relative;
+  width: 88%;
+  transform-origin: 50% 88%;
+  animation: rover-splash-arrive 850ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rover-splash-mascot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.rover-mascot-base {
+  fill: var(--blue);
+}
+.rover-mascot-shade {
+  fill: color-mix(in srgb, var(--blue) 75%, var(--text));
+}
+.rover-mascot-dark {
+  fill: var(--text);
+}
+.rover-mascot-light {
+  fill: var(--page);
+}
+.rover-mascot-shadow {
+  fill: color-mix(in srgb, var(--blue) 18%, var(--page));
+}
+.rover-mascot-head {
+  transform-origin: 120px 150px;
+  animation: rover-splash-nod 1200ms ease-in-out 200ms both;
+}
+.rover-mascot-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rover-splash-blink 1400ms linear both;
+}
+.rover-splash-brand {
+  display: grid;
+  gap: 4px;
+  animation: rover-splash-label 650ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
+}
+.rover-splash-brand h1 {
+  margin: 0;
+  font-family: var(--dls-font-display);
+  font-size: var(--dls-text-xl);
+  font-weight: 800;
+  line-height: var(--dls-leading-tight);
+}
+.rover-splash-brand p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--dls-text-md);
+}
+.rover-splash-loading {
+  display: flex;
+  gap: 8px;
+  height: 12px;
+}
+.rover-splash-loading span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: rover-splash-dot 900ms ease-in-out infinite;
+}
+.rover-splash-loading span:nth-child(2) {
+  animation-delay: 150ms;
+}
+.rover-splash-loading span:nth-child(3) {
+  animation-delay: 300ms;
+}
+.rover-splash-spark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--blue);
+  animation: rover-splash-spark 1100ms ease-out both;
+}
+.rover-splash-spark-one {
+  left: 8%;
+  top: 24%;
+  rotate: -16deg;
+}
+.rover-splash-spark-two {
+  right: 6%;
+  top: 60%;
+  width: 10px;
+  height: 10px;
+  rotate: 20deg;
+  animation-delay: 180ms;
+}
+@keyframes rover-splash-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(32px) scale(0.75) rotate(-8deg);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-7px) scale(1.03) rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes rover-splash-orbit {
+  from {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes rover-splash-nod {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  40% {
+    transform: rotate(-5deg);
+  }
+  70% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes rover-splash-blink {
+  0%,
+  52%,
+  64%,
+  100% {
+    transform: scaleY(1);
+  }
+  57%,
+  60% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes rover-splash-label {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rover-splash-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+@keyframes rover-splash-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  55% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.6);
+  }
+}
+.rover-splash[data-reduced="true"],
+.rover-splash[data-reduced="true"] * {
+  animation: none;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rover-splash,
+  .rover-splash * {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-height: 520px) {
+  .rover-splash-content {
+    gap: 12px;
+  }
+  .rover-splash-stage {
+    width: min(180px, 45vh);
+  }
+}
